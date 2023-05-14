@@ -32,15 +32,24 @@ export default function Home() {
   }
 
   return (
-    <div>
+      <div>
       <Head>
-        <title>OpenAI Quickstart</title>
-        <link rel="icon" href="/dog.png" />
+        <title>Chord Progressions AI</title>
+        <link rel="icon" href="/chord.png" />
+        <link
+          rel="preconnect"
+          href="https://cdn.fontshare.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap"
+        />
       </Head>
 
       <main className={styles.main}>
-        <img src="/dog.png" className={styles.icon} />
-        <h3>Navigate Web3</h3>
+        <img src="/chord.png" className={styles.icon} />
+        <h3>Chord Progressions AI</h3>
         <form onSubmit={onSubmit}>
           <input
             type="text"
@@ -52,7 +61,8 @@ export default function Home() {
           <input type="submit" value="Navigate" />
         </form>
         <div className={styles.result}>{result}</div>
+
       </main>
-    </div>
+     </div>
   );
 }

@@ -1,5 +1,5 @@
 {
-  "name": "openai-quickstart-node",
+  "name": "chord-progressions-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,10 +8,23 @@
     "start": "next start"
   },
   "dependencies": {
+    "@tailwindcss/line-clamp": "^0.4.2",
+    "@tailwindcss/typography": "^0.5.7",
+    "autoprefixer": "^10.4.12",
+    "clsx": "^1.2.1",
+    "focus-visible": "^5.2.0",
     "next": "^13.1.1",
     "openai": "^3.2.1",
+    "postcss-focus-visible": "^6.0.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-aria": "^3.19.0",
+    "react-dom": "^18.2.0",
+    "react-stately": "^3.17.0",
+    "tailwindcss": "^3.1.8"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.8",
+    "prettier-plugin-tailwindcss": "^0.1.13"
   },
   "engines": {
     "node": ">=14.6.0"

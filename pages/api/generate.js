@@ -15,11 +15,11 @@ export default async function (req, res) {
     return;
   }
 
-  const cryptoQuery = req.body.cryptoQuery || "";
-  if (cryptoQuery.trim().length === 0) {
+  const userInput = req.body.userInput || "";
+  if (userInput.trim().length === 0) {
     res.status(400).json({
       error: {
-        message: "Please enter a valid cryptoQuery",
+        message: "Please enter a valid userInput",
       },
     });
     return;
@@ -28,7 +28,7 @@ export default async function (req, res) {
   try {
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: generatePrompt(cryptoQuery) }],
+      messages: [{ role: "user", content: generatePrompt(userInput) }],
     });
     res.status(200).json({ result: completion.data.choices[0].message.content });
   } catch (error) {
@@ -47,16 +47,17 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(cryptoQuery) {
-  return `Create a list of popular crypto ${cryptoQuery} in JSON format using the following data structure:
+function generatePrompt(mood, style, instrument, key) {
+  return `Create me a ${mood} chord progression playable on ${instrument} in the style of ${style} and in the key of ${key}.
 
-[
-  {
-    "name": "",
-    "website": ""
-  }
-]
+Respond only with a JSON object with the following properties:
 
-Respond with only the JSON result without any other text. Sort the list based on popularity.
-`;
+result: an array of strings representing the chords within the progression.
+context: a description of the chord progression provided.
+key: what key the chord progression is in.
+scale: what scale the chord progression is in.
+tempo: what tempo the chord progression should be played.
+style: what style of the chord progression is.
+
+Add any other meaningful properties that might also be relevant to the JSON object.`;
 }
