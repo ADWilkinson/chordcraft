@@ -701,7 +701,7 @@ export default function Home() {
                             </div>
                           </div>
                         ) : (
-                          !tab && (
+                          !tab && prompt.instrument == 'Guitar' && (
                             <button
                               disabled={
                                 loading ||
