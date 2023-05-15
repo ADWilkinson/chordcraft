@@ -30,6 +30,12 @@ export default async function (req, res) {
     const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: generateGuitarTab(chords) }],
+      temperature: 0.2,
+      max_tokens: 256,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      stream: false,
     })
     res.status(200).json({ result: completion.data.choices[0].message.content })
   } catch (error) {

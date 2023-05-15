@@ -605,11 +605,11 @@ export default function Home() {
 
                 <div className="pt-8">
                   {loading ? (
-                    <div class="text-center">
+                    <div className="text-center">
                       <div role="status">
                         <svg
                           aria-hidden="true"
-                          class="my-8 mr-2 inline h-8 w-8 animate-spin fill-indigo-600 text-gray-200 dark:text-gray-600"
+                          className="my-8 mr-2 inline h-8 w-8 animate-spin fill-indigo-600 text-gray-200 dark:text-gray-600"
                           viewBox="0 0 100 101"
                           fill="none"
                           xmlns="http://www.w3.org/2000/svg"
@@ -623,7 +623,7 @@ export default function Home() {
                             fill="currentFill"
                           />
                         </svg>
-                        <span class="sr-only">Loading...</span>
+                        <span className="sr-only">Loading...</span>
                       </div>
                     </div>
                   ) : (
@@ -650,8 +650,10 @@ export default function Home() {
 
                         <h3 className=" rounded-lg bg-white px-4 py-5 text-4xl font-bold tracking-tight">
                           {generation &&
-                            generation.result.map((chord) => (
-                              <span className={''}>{chord} </span>
+                            generation.result.map((chord, index) => (
+                              <span key={index} className={''}>
+                                {chord}{' '}
+                              </span>
                             ))}
                         </h3>
                         <p className="text-md  leading-8 text-gray-600">
@@ -692,11 +694,11 @@ export default function Home() {
                         </dl>
 
                         {loadingTab ? (
-                          <div class="text-center">
+                          <div className="text-center">
                             <div role="status">
                               <svg
                                 aria-hidden="true"
-                                class="my-8 mr-2 inline h-8 w-8 animate-spin fill-indigo-600 text-gray-200 dark:text-gray-600"
+                                className="my-8 mr-2 inline h-8 w-8 animate-spin fill-indigo-600 text-gray-200 dark:text-gray-600"
                                 viewBox="0 0 100 101"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -710,7 +712,7 @@ export default function Home() {
                                   fill="currentFill"
                                 />
                               </svg>
-                              <span class="sr-only">Loading...</span>
+                              <span className="sr-only">Loading...</span>
                             </div>
                           </div>
                         ) : (
