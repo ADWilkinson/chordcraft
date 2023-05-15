@@ -15,8 +15,8 @@ export default async function (req, res) {
     return;
   }
 
-  const userInput = req.body.userInput || "";
-  if (userInput.trim().length === 0) {
+  const userInput = req.body.userInput || null;
+  if (userInput === null) {
     res.status(400).json({
       error: {
         message: "Please enter a valid userInput",
@@ -47,8 +47,8 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt(mood, style, instrument, key) {
-  return `Create me a ${mood} chord progression playable on ${instrument} in the style of ${style} and in the key of ${key}.
+function generatePrompt({ mood, style, instrument }) {
+  return `Create me a ${mood} chord progression playable on ${instrument} in the style of ${style}.
 
 Respond only with a JSON object with the following properties:
 
