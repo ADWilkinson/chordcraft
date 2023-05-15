@@ -3,7 +3,9 @@ import { useState } from 'react'
 import 'focus-visible'
 import { Container } from '../components/Container'
 import { Menu, Transition } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import {
+  ChevronDownIcon,
+} from '@heroicons/react/20/solid'
 import { Fragment } from 'react'
 
 function classNames(...classes) {
@@ -51,7 +53,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Chord Progressions AI</title>
+        <title>Chord Progression AI</title>
         <meta
           name="description"
           content="Generate chord progressions with AI."
@@ -80,7 +82,7 @@ export default function Home() {
                   src="/chord.png"
                 />
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                  Chord Progressions AI
+                  Chord Progression AI
                 </h1>
                 <p className="mt-6 text-lg leading-8 text-gray-600">
                   Select a instrument, style and mood to generate something new
@@ -144,13 +146,52 @@ export default function Home() {
                               </div>
                             )}
                           </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <>
+                                <input
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      setPrompt({
+                                        ...prompt,
+                                        instrument: e.target.value,
+                                      })
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    e.preventDefault()
+
+                                    setPrompt({
+                                      ...prompt,
+                                      instrument: e.target.value,
+                                    })
+                                  }}
+                                  className={classNames(
+                                    active
+                                      ? 'bg-gray-100 text-gray-900'
+                                      : 'text-gray-700',
+                                    'group flex items-center px-4 py-2 text-sm'
+                                  )}
+                                  placeholder="Add another"
+                                />
+                              </>
+                            )}
+                          </Menu.Item>
                         </div>
                       </Menu.Items>
                     </Transition>
                   </Menu>
 
-                  {/* instrument */}
-                  <Menu as="div" className="relative inline-block text-left">
+                  {/* style */}
+                  <Menu
+                    onKeyDown={(e) => {
+                      if (e.key === 'Spacebar') {
+                        setPrompt({ ...prompt, style: '123' })
+                      }
+                    }}
+                    as="div"
+                    className="relative inline-block text-left"
+                  >
                     <div>
                       <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                         {prompt.style || 'Style'}
@@ -296,6 +337,38 @@ export default function Home() {
                               </div>
                             )}
                           </Menu.Item>
+
+                          <Menu.Item>
+                            {({ active }) => (
+                              <>
+                                <input
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      setPrompt({
+                                        ...prompt,
+                                        style: e.target.value,
+                                      })
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    e.preventDefault()
+
+                                    setPrompt({
+                                      ...prompt,
+                                      style: e.target.value,
+                                    })
+                                  }}
+                                  className={classNames(
+                                    active
+                                      ? 'bg-gray-100 text-gray-900'
+                                      : 'text-gray-700',
+                                    'group flex items-center px-4 py-2 text-sm'
+                                  )}
+                                  placeholder="Add another"
+                                />
+                              </>
+                            )}
+                          </Menu.Item>
                         </div>
                       </Menu.Items>
                     </Transition>
@@ -430,6 +503,38 @@ export default function Home() {
                               </div>
                             )}
                           </Menu.Item>
+
+                          <Menu.Item>
+                            {({ active }) => (
+                              <>
+                                <input
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      setPrompt({
+                                        ...prompt,
+                                        mood: e.target.value,
+                                      })
+                                    }
+                                  }}
+                                  onChange={(e) => {
+                                    e.preventDefault()
+
+                                    setPrompt({
+                                      ...prompt,
+                                      mood: e.target.value,
+                                    })
+                                  }}
+                                  className={classNames(
+                                    active
+                                      ? 'bg-gray-100 text-gray-900'
+                                      : 'text-gray-700',
+                                    'group flex items-center px-4 py-2 text-sm'
+                                  )}
+                                  placeholder="Add another"
+                                />
+                              </>
+                            )}
+                          </Menu.Item>
                         </div>
                       </Menu.Items>
                     </Transition>
@@ -460,10 +565,15 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                      <button
-                      disabled={loading || (prompt.instrument === '' || prompt.mood === '' || prompt.style === '')}
+                    <button
+                      disabled={
+                        loading ||
+                        prompt.instrument === '' ||
+                        prompt.mood === '' ||
+                        prompt.style === ''
+                      }
                       onClick={onSubmit}
-                      className="disabled:bg-gray-600 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-gray-600"
                     >
                       Generate <span aria-hidden="true">→</span>
                     </button>
