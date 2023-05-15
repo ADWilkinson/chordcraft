@@ -48,7 +48,7 @@ export default async function (req, res) {
 }
 
 function generatePrompt({ mood, style, instrument }) {
-  return `Create me a ${mood} chord progression playable on ${instrument} in the style of ${style}.
+  return `Create a ${mood} chord progression playable on ${instrument} in the style of ${style}.
 
 Respond only with a JSON object with the following properties:
 
