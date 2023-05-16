@@ -581,7 +581,7 @@ export default function Home() {
   const GenerationSection = (
     <div className="">
       {loading ? (
-        <div className="text-center mt-4">
+        <div className="mt-4 text-center">
           <div role="status">
             <svg
               aria-hidden="true"
@@ -657,6 +657,12 @@ export default function Home() {
                     </>
                   ))}
               </h3>
+              {generation && prompt.instrument === 'Guitar' && (
+                <p className="text-md  leading-8 text-pink-600">
+                  Strumming Pattern:{' '}
+                  {generation && generation.strumming_pattern}
+                </p>
+              )}
               <p className="text-md  leading-8 text-gray-700">
                 {generation && generation.context}
               </p>

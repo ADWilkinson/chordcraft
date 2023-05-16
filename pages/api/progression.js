@@ -72,7 +72,7 @@ ${
 }
 ${
   instrument === 'Guitar'
-    ? 'strumming pattern: a relevant strumming pattern for the chord progression.'
+    ? 'strumming_pattern: a relevant strumming pattern for the chord progression.'
     : ''
 }`
 }
