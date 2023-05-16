@@ -1,4 +1,4 @@
-# Chord Progressions AI
+# ChordCraft
 
 ## Setup
 

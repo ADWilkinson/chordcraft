@@ -175,7 +175,7 @@ export default function Home() {
     <div className="border-b pb-4">
       <img className="mx-auto mb-6 h-32 w-32 justify-center" src="/chord.png" />
       <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-        Chord Progression AI
+        ChordCraft
       </h1>
       <p className="mt-6 text-lg leading-8 text-gray-600">
         Select a instrument, style and mood to generate something new to play.
@@ -774,10 +774,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Chord Progression AI</title>
+        <title>ChordCraft | AI Music Generator</title>
         <meta
           name="description"
-          content="Generate chord progressions with AI."
+          content="Generate chord progressions, tablature and more with AI using ChatGPT."
         />
         <link rel="icon" href="/chord.png" />
       </Head>
