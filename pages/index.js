@@ -183,7 +183,7 @@ export default function Home() {
     </div>
   )
 
-  const UserSelectionMenus = (
+  const UserSelectionMenus = !generation && (
     <div className="mt-6 flex items-center justify-center gap-x-6">
       {/* style */}
       <Menu as="div" className="relative inline-block text-left">
@@ -579,13 +579,13 @@ export default function Home() {
   )
 
   const GenerationSection = (
-    <div className="pt-6">
+    <div className="">
       {loading ? (
-        <div className="text-center">
+        <div className="text-center mt-4">
           <div role="status">
             <svg
               aria-hidden="true"
-              className="my-8 mr-2 inline h-8 w-8 animate-spin fill-indigo-600 text-gray-200 dark:text-gray-600"
+              className="my-6 mr-2 inline h-8 w-8 animate-spin fill-pink-500 text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -601,34 +601,60 @@ export default function Home() {
             </svg>
             <span className="sr-only">Loading...</span>
           </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Hold tight, this can take up to 15 seconds!
+          </p>
         </div>
       ) : (
-        <button
-          disabled={
-            loading ||
-            prompt.instrument === '' ||
-            prompt.mood === '' ||
-            prompt.style === ''
-          }
-          onClick={generateProgression}
-          className="rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
-        >
-          Generate <span aria-hidden="true">→</span>
-        </button>
+        <>
+          {generation ? (
+            <button
+              disabled={loading}
+              onClick={() => setGeneration()}
+              className="justify-left mt-6 flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
+            >
+              <span aria-hidden="true">←</span>&nbsp;New Progression
+            </button>
+          ) : (
+            <button
+              disabled={
+                loading ||
+                prompt.instrument === '' ||
+                prompt.mood === '' ||
+                prompt.style === ''
+              }
+              onClick={generateProgression}
+              className=" mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
+            >
+              Generate&nbsp;<span aria-hidden="true">→</span>
+            </button>
+          )}
+        </>
       )}
       <div className="mt-4 py-4">
         {generation && (
           <div>
-            <h3 className="pb-4 text-base font-semibold leading-6 text-gray-900 ">
+            <h3 className="pb-6 text-base font-semibold leading-6 text-gray-900 ">
               Progression
             </h3>
             <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
               <h3 className=" rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
                 {generation &&
                   generation.result.map((chord, index) => (
-                    <span key={index} className={'text-pink-500'}>
-                      {chord}{' '}
-                    </span>
+                    <>
+                      <span key={index} className={'px-0.5 text-pink-500'}>
+                        {chord}{' '}
+                      </span>
+                      {generation.result.length >= 6 &&
+                        generation.result.length < 12 &&
+                        index === 3 && <br></br>}
+                      {generation.result.length >= 12 &&
+                        generation.result.length < 16 &&
+                        index === 7 && <br></br>}
+                      {generation.result.length >= 16 && index === 11 && (
+                        <br></br>
+                      )}
+                    </>
                   ))}
               </h3>
               <p className="text-md  leading-8 text-gray-700">
@@ -645,7 +671,7 @@ export default function Home() {
                 <dt className="truncate text-sm font-medium text-gray-500">
                   Key
                 </dt>
-                <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                   {generation && generation.key}
                 </dd>
               </div>
@@ -654,7 +680,7 @@ export default function Home() {
                 <dt className="truncate text-sm font-medium text-gray-500">
                   Tempo
                 </dt>
-                <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                   {generation && generation.tempo}
                 </dd>
               </div>
@@ -663,7 +689,7 @@ export default function Home() {
                 <dt className="truncate text-sm font-medium text-gray-500">
                   Style
                 </dt>
-                <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                   {generation && generation.style}
                 </dd>
               </div>
@@ -720,12 +746,12 @@ export default function Home() {
                       uniqueChords.map((c, i) => (
                         <div
                           key={i}
-                          className="bg-whice overflow-hidden rounded-lg px-4 py-5 shadow sm:p-6"
+                          className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
                         >
                           <dt className="truncate text-sm font-semibold text-gray-500">
                             {c.chord}
                           </dt>
-                          <dd className="mt-1 text-xl font-semibold tracking-tight text-gray-900">
+                          <dd className="mt-1 text-xl font-semibold uppercase tracking-wider text-gray-900">
                             {c.tab.toString()}
                           </dd>
                         </div>
