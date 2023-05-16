@@ -63,8 +63,8 @@ result: an array of strings representing the chords within the progression.
 context: a description of the chord progression provided.
 key: what key the chord progression is in.
 scale: what scale the chord progression is in.
-tempo: what tempo the chord progression should be played.
-style: what style of the chord progression is.
+tempo: what tempo the chord progression should be played in.
+style: what style of music the chord progression is categorised as.
 ${
   instrument === 'Guitar'
     ? "fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format 'X-X-X-X-X-X'."
