@@ -19,13 +19,12 @@ export default function Home() {
     mood: '',
   })
   const [generation, setGeneration] = useState()
-  const [tab, setTab] = useState()
+  // const [tab, setTab] = useState()
   const [loading, setLoading] = useState(false)
-  const [loadingTab, setLoadingTab] = useState(false)
+  // const [loadingTab, setLoadingTab] = useState(false)
   const [showError, setShowError] = useState(false)
 
   useEffect(() => {
-    setTab()
     setGeneration()
   }, [prompt.instrument, prompt.style, prompt.mood])
 
@@ -67,36 +66,36 @@ export default function Home() {
     }
   }
 
-  async function generateGuitarTab(event) {
-    if (generation.result === undefined) return
-    event.preventDefault()
-    try {
-      setLoadingTab(true)
-      const response = await fetch('/api/tablature', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ generatedChords: generation.result }),
-      })
+  // async function generateGuitarTab(event) {
+  //   if (generation.result === undefined) return
+  //   event.preventDefault()
+  //   try {
+  //     setLoadingTab(true)
+  //     const response = await fetch('/api/tablature', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ generatedChords: generation.result }),
+  //     })
 
-      const data = await response.json()
-      setLoadingTab(false)
-      if (response.status !== 200) {
-        throw (
-          data.error ||
-          new Error(`Request failed with status ${response.status}`)
-        )
-      }
+  //     const data = await response.json()
+  //     setLoadingTab(false)
+  //     if (response.status !== 200) {
+  //       throw (
+  //         data.error ||
+  //         new Error(`Request failed with status ${response.status}`)
+  //       )
+  //     }
 
-      setTab(JSON.parse(data.result))
-    } catch (error) {
-      // Consider implementing your own error handling logic here
-      console.error(error)
-      setLoadingTab(false)
-      setShowError(true)
-    }
-  }
+  //     setTab(JSON.parse(data.result))
+  //   } catch (error) {
+  //     // Consider implementing your own error handling logic here
+  //     console.error(error)
+  //     setLoadingTab(false)
+  //     setShowError(true)
+  //   }
+  // }
 
   const filterChords = (chords) => {
     const uniqueChords = new Set()
@@ -110,7 +109,9 @@ export default function Home() {
   }
 
   const uniqueChords =
-    tab && tab.result && tab.result.length > 0 ? filterChords(tab.result) : []
+    generation && generation.fingering && generation.fingering.length > 0
+      ? filterChords(generation.fingering)
+      : []
 
   const ErrorNotification = (
     <>
@@ -668,7 +669,7 @@ export default function Home() {
               </div>
             </dl>
 
-            {loadingTab ? (
+            {/* {loadingTab ? (
               <div className="text-center">
                 <div role="status">
                   <svg
@@ -706,16 +707,16 @@ export default function Home() {
                   Generate Tab <span aria-hidden="true">→</span>
                 </button>
               )
-            )}
+            )} */}
 
-            {tab && (
+            {generation && prompt.instrument === 'Guitar' && (
               <div className="mt-4 py-4">
                 <div className="rounded-lg  px-4 py-5  sm:p-6">
                   <h3 className="pb-1 text-base font-semibold leading-6 text-gray-900 ">
                     Chord Tabs
                   </h3>
                   <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    {tab &&
+                    {generation &&
                       uniqueChords.map((c, i) => (
                         <div
                           key={i}
