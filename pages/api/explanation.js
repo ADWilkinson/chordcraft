@@ -85,13 +85,17 @@ export default async function (req, res) {
 function generateExplanation(chordProgression, style, key) {
   return `Given we have the following ${style} chord progression in the key of ${key}.
   
-Chord Progression: ${chordProgression}.
+Chord Progression:
+"""
+${chordProgression}.
+"""
 
 What information would be helpful to know about it?
 
-Respond only with a JSON object with the following structure.
-
+Respond only with a JSON object with the following structure:
+"""
 result: an array of objects with two string properties, "topic" and "explanation".
+"""
 
-Your response message must be valid JSON with no other text above or below.`
+Your response message must be valid JSON with no other text above or below. Be Concise with your explanations and without repeating yourself..`
 }

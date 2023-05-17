@@ -75,6 +75,7 @@ function generatePrompt({ mood, style, instrument }) {
 
 Respond only with a JSON object with the following properties:
 
+"""
 result: an array of strings representing the chords within the progression.
 context: a description of the chord progression provided.
 key: what key the chord progression is in.
@@ -91,6 +92,7 @@ ${
     ? 'strumming_pattern: a relevant strumming pattern for the chord progression.'
     : ''
 }
+"""
 
-Your response message must be valid JSON with no other text above or below.`
+Your response message must be valid JSON with no other text above or below. Be concise with your response.`
 }
