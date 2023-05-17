@@ -9,6 +9,7 @@ import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { XMarkIcon } from '@heroicons/react/20/solid'
 import { Disclosure } from '@headlessui/react'
 import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
+import va from '@vercel/analytics'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -61,6 +62,7 @@ export default function Home() {
       }
 
       setGeneration(JSON.parse(data.result))
+      va.track('progression', prompt)
     } catch (error) {
       // Consider implementing your own error handling logic here
       console.error(error)
@@ -80,7 +82,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          progression: generation.result,
+          progression: generation.result.toString(),
           style: generation.style,
           key: generation.key,
         }),
@@ -96,6 +98,11 @@ export default function Home() {
       }
 
       setExplanation(JSON.parse(data.result))
+      va.track('explanation', {
+        progression: generation.result,
+        style: generation.style,
+        key: generation.key,
+      })
     } catch (error) {
       // Consider implementing your own error handling logic here
       console.error(error)
