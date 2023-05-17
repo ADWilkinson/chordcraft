@@ -15,47 +15,55 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Home() {
-  const [prompt, setPrompt] = useState({
+const filterChords = (chords) => {
+  const uniqueChords = new Set()
+  return chords.filter((item) => {
+    if (!uniqueChords.has(item.chord)) {
+      uniqueChords.add(item.chord)
+      return true
+    }
+    return false
+  })
+}
+
+const initialState = {
+  prompt: {
     instrument: '',
     style: '',
     mood: '',
-  })
-  const [generation, setGeneration] = useState()
-  const [loading, setLoading] = useState(false)
-  const [explanation, setExplanation] = useState()
-  const [loadingExplanation, setLoadingExplanation] = useState(false)
-  const [showError, setShowError] = useState(false)
-  const [promptHistory, setPromptHistory] = useState([])
+  },
+  generation: undefined,
+  loading: false,
+  explanation: undefined,
+  loadingExplanation: false,
+  showError: false,
+  promptHistory: [],
+}
+
+export default function Home() {
+  const [state, setState] = useState(initialState)
 
   useEffect(() => {
-    setGeneration()
-    setExplanation()
-    setPromptHistory([])
-  }, [prompt.instrument, prompt.style, prompt.mood])
-
-  useEffect(() => {
-    if (showError) {
+    if (state.showError) {
       setTimeout(() => {
-        setShowError(false)
+        setState(() => ({ ...state, showError: false }))
       }, 5000)
     }
-  }, [showError])
+  }, [state.showError])
 
   async function generateProgression(event) {
     event.preventDefault()
     try {
-      setLoading(true)
+      setState(() => ({ ...state, loading: true }))
       const response = await fetch('/api/progression', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userInput: prompt }),
+        body: JSON.stringify({ userInput: state.prompt }),
       })
 
       const data = await response.json()
-      setLoading(false)
       if (response.status !== 200) {
         throw (
           data.error ||
@@ -63,45 +71,51 @@ export default function Home() {
         )
       }
 
-      setGeneration(JSON.parse(data.result))
-      setPromptHistory([
-        ...promptHistory,
-        { role: 'user', content: data.input },
-        {
-          role: 'assistant',
-          content: data.result,
-        },
-      ])
+      const result = data.result
+      setState(() => ({
+        ...state,
+        loading: false,
+        generation: result,
+        promptHistory: [
+          ...state.promptHistory,
+          { role: 'user', content: data.input },
+          {
+            role: 'assistant',
+            content: JSON.stringify(result),
+          },
+        ],
+      }))
 
-      va.track('progression', prompt)
+      va.track('progression', state.prompt)
     } catch (error) {
-      // Consider implementing your own error handling logic here
       console.error(error)
-      setLoading(false)
-      setShowError(true)
+      setState({
+        ...state,
+        loading: false,
+        showError: true,
+      })
     }
   }
 
   async function generateExplanation(event) {
-    if (generation.result === undefined) return
     event.preventDefault()
+    if (state.generation?.result === undefined) return
     try {
-      setLoadingExplanation(true)
+      setState({ ...state, loadingExplanation: true })
       const response = await fetch('/api/explanation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          progression: generation.result.toString(),
-          style: generation.style,
-          key: generation.key,
-          history: [...promptHistory],
+          progression: state.generation.result.toString(),
+          style: state.generation.style,
+          key: state.generation.key,
+          history: [...state.promptHistory],
         }),
       })
 
       const data = await response.json()
-      setLoadingExplanation(false)
       if (response.status !== 200) {
         throw (
           data.error ||
@@ -109,43 +123,41 @@ export default function Home() {
         )
       }
 
-      setExplanation(JSON.parse(data.result))
-      setPromptHistory([
-        ...promptHistory,
-        { role: 'user', content: data.input },
-        {
-          role: 'assistant',
-          content: JSON.stringify(data.result.toString),
-        },
-      ])
+      const result = data.result
+      setState({
+        ...state,
+        loadingExplanation: false,
+        explanation: result,
+        promptHistory: [
+          ...state.promptHistory,
+          { role: 'user', content: data.input },
+          {
+            role: 'assistant',
+            content: JSON.stringify(result.toString),
+          },
+        ],
+      })
 
       va.track('explanation', {
-        progression: generation.result,
-        style: generation.style,
-        key: generation.key,
+        progression: state.generation.result.toString(),
+        style: state.generation.style,
+        key: state.generation.key,
       })
     } catch (error) {
-      // Consider implementing your own error handling logic here
       console.error(error)
-      setLoadingExplanation(false)
-      setShowError(true)
+      setState({
+        ...state,
+        loadingExplanation: false,
+        showError: true,
+      })
     }
   }
 
-  const filterChords = (chords) => {
-    const uniqueChords = new Set()
-    return chords.filter((item) => {
-      if (!uniqueChords.has(item.chord)) {
-        uniqueChords.add(item.chord)
-        return true
-      }
-      return false
-    })
-  }
-
   const uniqueChords =
-    generation && generation.fingering && generation.fingering.length > 0
-      ? filterChords(generation.fingering)
+    state.generation &&
+    state.generation.fingering &&
+    state.generation.fingering.length > 0
+      ? filterChords(state.generation.fingering)
       : []
 
   const ErrorNotification = (
@@ -158,7 +170,7 @@ export default function Home() {
         <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
           {/* Notification panel, dynamically insert this into the live region when it needs to be displayed */}
           <Transition
-            show={showError}
+            show={state.showError || false}
             as={Fragment}
             enter="transform ease-out duration-300 transition"
             enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
@@ -190,7 +202,10 @@ export default function Home() {
                       type="button"
                       className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       onClick={() => {
-                        setShowError(false)
+                        setState({
+                          ...state,
+                          showError: true,
+                        })
                       }}
                     >
                       <span className="sr-only">Close</span>
@@ -206,28 +221,68 @@ export default function Home() {
     </>
   )
 
-  const Hero = (
+  const Hero = () => (
     <div className="border-b pb-4">
       <img
         className="mx-auto mb-6 h-24 w-24 justify-center border-black sm:h-32 sm:w-32"
         src="/chord.png"
+        alt="ChordCraft Logo"
       />
       <h1 className="text-4xl font-bold tracking-tight text-gray-800 sm:text-6xl">
         ChordCraft
       </h1>
       <p className="mt-6 text-lg leading-8 text-gray-600">
-        Select a instrument, style and mood to generate something new to play.
+        Select an instrument, style, and mood to generate something new to play.
       </p>
     </div>
   )
 
-  const UserSelectionMenus = !generation && (
+  const createMenuItem = (property, itemName) => {
+    return (
+      <Menu.Item key={itemName}>
+        {({ active }) => (
+          <div
+            onClick={() => {
+              if (property === 'style') {
+                setState((prevState) => ({
+                  ...prevState,
+                  prompt: { ...prevState.prompt, style: itemName },
+                }))
+              }
+
+              if (property === 'instrument') {
+                setState((prevState) => ({
+                  ...prevState,
+                  prompt: { ...prevState.prompt, instrument: itemName },
+                }))
+              }
+
+              if (property === 'mood') {
+                setState((prevState) => ({
+                  ...prevState,
+                  prompt: { ...prevState.prompt, mood: itemName },
+                }))
+              }
+            }}
+            className={classNames(
+              active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
+              'block px-4 py-2 text-sm'
+            )}
+          >
+            {itemName}
+          </div>
+        )}
+      </Menu.Item>
+    )
+  }
+
+  const UserSelectionMenus = !state.generation && (
     <div className="mt-6 flex items-center justify-center gap-x-6">
       {/* style */}
       <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-            {prompt.instrument || 'Instrument'}
+            {state.prompt.instrument || 'Instrument'}
             <ChevronDownIcon
               className="-mr-1 h-5 w-5 text-gray-400"
               aria-hidden="true"
@@ -246,54 +301,33 @@ export default function Home() {
         >
           <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() =>
-                      setPrompt({ ...prompt, instrument: 'Guitar' })
-                    }
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Guitar
-                  </div>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() =>
-                      setPrompt({ ...prompt, instrument: 'Piano' })
-                    }
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Piano
-                  </div>
-                )}
-              </Menu.Item>
+              {['Guitar', 'Piano'].map((item) =>
+                createMenuItem('instrument', item)
+              )}
+
               <Menu.Item>
                 {({ active }) => (
                   <>
                     <input
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          setPrompt({
-                            ...prompt,
-                            instrument: e.target.value,
+                          setState({
+                            ...state,
+                            prompt: {
+                              ...state.prompt,
+                              instrument: e.target.value,
+                            },
                           })
                         }
                       }}
                       onChange={(e) => {
                         e.preventDefault()
 
-                        setPrompt({
-                          ...prompt,
-                          instrument: e.target.value,
+                        setState({
+                          prompt: {
+                            ...state.prompt,
+                            instrument: e.target.value,
+                          },
                         })
                       }}
                       className={classNames(
@@ -311,18 +345,10 @@ export default function Home() {
       </Menu>
 
       {/* style */}
-      <Menu
-        onKeyDown={(e) => {
-          if (e.key === 'Spacebar') {
-            setPrompt({ ...prompt, style: '123' })
-          }
-        }}
-        as="div"
-        className="relative inline-block text-left"
-      >
+      <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-            {prompt.style || 'Style'}
+            {state.prompt.style || 'Style'}
             <ChevronDownIcon
               className="-mr-1 h-5 w-5 text-gray-400"
               aria-hidden="true"
@@ -341,102 +367,15 @@ export default function Home() {
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Jazz' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Jazz
-                  </div>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Blues' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Blues
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Rock' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Rock
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Classical' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Classical
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Gospel' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Gospel
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Country' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Country
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, style: 'Pop' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Pop
-                  </div>
-                )}
-              </Menu.Item>
+              {[
+                'Jazz',
+                'Blues',
+                'Rock',
+                'Classical',
+                'Gospel',
+                'Country',
+                'Pop',
+              ].map((item) => createMenuItem('style', item))}
 
               <Menu.Item>
                 {({ active }) => (
@@ -444,18 +383,24 @@ export default function Home() {
                     <input
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          setPrompt({
-                            ...prompt,
-                            style: e.target.value,
+                          setState({
+                            ...state,
+                            prompt: {
+                              ...state.prompt,
+                              style: e.target.value,
+                            },
                           })
                         }
                       }}
                       onChange={(e) => {
                         e.preventDefault()
 
-                        setPrompt({
-                          ...prompt,
-                          style: e.target.value,
+                        setState({
+                          ...state,
+                          prompt: {
+                            ...state.prompt,
+                            style: e.target.value,
+                          },
                         })
                       }}
                       className={classNames(
@@ -476,7 +421,7 @@ export default function Home() {
       <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-            {prompt.mood || 'Mood'}
+            {state.prompt.mood || 'Mood'}
             <ChevronDownIcon
               className="-mr-1 h-5 w-5 text-gray-400"
               aria-hidden="true"
@@ -495,90 +440,14 @@ export default function Home() {
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, mood: 'Happy' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Happy
-                  </div>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, mood: 'Sad' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Sad
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, mood: 'Energetic' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Energetic
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, mood: 'Relaxing' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Relaxing
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() => setPrompt({ ...prompt, mood: 'Epic' })}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Epic
-                  </div>
-                )}
-              </Menu.Item>
-
-              <Menu.Item>
-                {({ active }) => (
-                  <div
-                    onClick={() =>
-                      setPrompt({ ...prompt, mood: 'Melancholic' })
-                    }
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Melancholic
-                  </div>
-                )}
-              </Menu.Item>
+              {[
+                'Happy',
+                'Sad',
+                'Energetic',
+                'Relaxing',
+                'Epic',
+                'Melancholic',
+              ].map((item) => createMenuItem('mood', item))}
 
               <Menu.Item>
                 {({ active }) => (
@@ -586,18 +455,23 @@ export default function Home() {
                     <input
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          setPrompt({
-                            ...prompt,
-                            mood: e.target.value,
+                          setState({
+                            ...state,
+                            prompt: {
+                              ...state.prompt,
+                              mood: e.target.value,
+                            },
                           })
                         }
                       }}
                       onChange={(e) => {
                         e.preventDefault()
 
-                        setPrompt({
-                          ...prompt,
-                          mood: e.target.value,
+                        setState({
+                          prompt: {
+                            ...state.prompt,
+                            mood: e.target.value,
+                          },
                         })
                       }}
                       className={classNames(
@@ -616,306 +490,256 @@ export default function Home() {
     </div>
   )
 
-  const GenerationSection = (
-    <div className="">
-      {loading ? (
-        <div className="mt-4 text-center">
-          <div role="status">
-            <svg
-              aria-hidden="true"
-              className="my-6 mr-2 inline h-8 w-8 animate-spin fill-pink-500 text-gray-200 dark:text-gray-600"
-              viewBox="0 0 100 101"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                fill="currentColor"
-              />
-              <path
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                fill="currentFill"
-              />
-            </svg>
-            <span className="sr-only">Loading...</span>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Hold tight, this can take up to 15 seconds!
-          </p>
+  const GenerationSection = () => {
+    const hasGeneration = state.generation && state.generation.result
+    const hasExplanation = state.explanation && state.explanation.result
+
+    const renderLoadingIndicator = () => (
+      <div className="mt-4 text-center">
+        <div role="status">
+          <svg
+            aria-hidden="true"
+            className="my-6 mr-2 inline h-8 w-8 animate-spin fill-pink-500 text-gray-200 dark:text-gray-600"
+            viewBox="0 0 100 101"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+              fill="currentColor"
+            />
+            <path
+              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+              fill="currentFill"
+            />
+          </svg>
+          <span className="sr-only">Loading...</span>
         </div>
-      ) : (
-        <>
-          {generation ? (
-            <button
-              disabled={loading}
-              onClick={() => {
-                setGeneration()
-                setExplanation()
-                setPromptHistory([])
-              }}
-              className="justify-left mt-6 flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
-            >
-              <span aria-hidden="true">←</span>&nbsp;New Progression
-            </button>
-          ) : (
-            <button
-              disabled={
-                loading ||
-                prompt.instrument === '' ||
-                prompt.mood === '' ||
-                prompt.style === ''
-              }
-              onClick={generateProgression}
-              className=" mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
-            >
-              Generate&nbsp;<span aria-hidden="true">→</span>
-            </button>
-          )}
-        </>
-      )}
-      <div className="mt-4 py-4">
-        {generation && (
-          <div>
-            <h3 className="pb-6 text-base font-semibold leading-6 text-gray-800 ">
-              Progression
-            </h3>
-            <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
-              <h3 className=" rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
-                {generation &&
-                  generation.result.map((chord, index) => (
-                    <>
-                      <span key={index} className={'px-0.5 text-pink-500'}>
-                        {chord}{' '}
-                      </span>
-                      {generation.result.length >= 6 &&
-                        generation.result.length < 12 &&
-                        index === 3 && <br></br>}
-                      {generation.result.length >= 12 &&
-                        generation.result.length < 16 &&
-                        index === 7 && <br></br>}
-                      {generation.result.length >= 16 && index === 11 && (
-                        <br></br>
-                      )}
-                    </>
-                  ))}
-              </h3>
-              {generation && prompt.instrument === 'Guitar' && (
-                <p className="text-md  leading-8 text-pink-600">
-                  Strumming Pattern:{' '}
-                  {generation && generation.strumming_pattern}
-                </p>
-              )}
-              <p className="text-md  leading-8 text-gray-700">
-                {generation && generation.context}
-              </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Hold tight, this can take up to 15 seconds!
+        </p>
+      </div>
+    )
+
+    const renderGenerationButton = () => (
+      <button
+        disabled={
+          state.loading ||
+          state.prompt.instrument === '' ||
+          state.prompt.mood === '' ||
+          state.prompt.style === ''
+        }
+        onClick={generateProgression}
+        className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
+      >
+        Generate&nbsp;<span aria-hidden="true">→</span>
+      </button>
+    )
+
+    const renderExplanationButton = () =>
+      state.generation &&
+      !state.explanation && (
+        <button
+          disabled={state.loadingExplanation || !hasGeneration}
+          onClick={generateExplanation}
+          className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
+        >
+          Explanation&nbsp;<span aria-hidden="true">→</span>
+        </button>
+      )
+
+    const renderChordTabs = () => (
+      <div className="mt-4">
+        <div className="rounded-lg  px-4 py-5  sm:p-6">
+          <h3 className="pb-1 text-base font-semibold leading-6 text-gray-800 ">
+            Chord Tabs
+          </h3>
+          <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+            {state.generation &&
+              uniqueChords.map((c, i) => (
+                <div
+                  key={i}
+                  className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
+                >
+                  <dt className="truncate text-sm font-semibold text-gray-500">
+                    {c.chord}
+                  </dt>
+                  <dd className="mt-1 text-xl font-semibold uppercase tracking-wider text-gray-800">
+                    {c.tab.toString()}
+                  </dd>
+                </div>
+              ))}
+          </dl>
+        </div>
+      </div>
+    )
+
+    const renderExplanation = () => (
+      <>
+        <h3 className="mt-8 text-base font-semibold leading-6 text-gray-800 ">
+          Explanation
+        </h3>
+        <div className="mt-6 rounded-lg bg-white shadow">
+          <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
+            <div className="mx-auto max-w-4xl divide-y divide-black/10">
+              <dl className="space-y-6 divide-y divide-black/10">
+                {state.explanation.result.map((x, index) => (
+                  <Disclosure
+                    as="div"
+                    key={x.topic}
+                    className={index === 0 ? '' : 'pt-6'}
+                  >
+                    {({ open }) => (
+                      <>
+                        <dt>
+                          <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
+                            <span className="text-base font-semibold leading-7">
+                              {x.topic}
+                            </span>
+                            <span className="ml-6 flex h-7 items-center">
+                              {open ? (
+                                <MinusSmallIcon
+                                  className="h-6 w-6"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <PlusSmallIcon
+                                  className="h-6 w-6"
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </span>
+                          </Disclosure.Button>
+                        </dt>
+                        <Disclosure.Panel
+                          as="dd"
+                          className="mt-2 pr-12 text-left"
+                        >
+                          <p className="text-left text-base leading-7 text-gray-600">
+                            {x.explanation}
+                          </p>
+                        </Disclosure.Panel>
+                      </>
+                    )}
+                  </Disclosure>
+                ))}
+              </dl>
             </div>
           </div>
+        </div>
+      </>
+    )
+
+    return (
+      <div className="">
+        {state.loading ? (
+          renderLoadingIndicator()
+        ) : (
+          <>
+            {hasGeneration ? (
+              <button
+                disabled={state.loading}
+                onClick={() => {
+                  setState(initialState)
+                }}
+                className="justify-left mt-6 flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
+              >
+                <span aria-hidden="true">←</span>&nbsp;New Progression
+              </button>
+            ) : (
+              renderGenerationButton()
+            )}
+          </>
         )}
 
-        {generation && (
-          <div>
-            <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-              <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <dt className="truncate text-sm font-medium text-gray-500">
-                  Key
-                </dt>
-                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-                  {generation && generation.key}
-                </dd>
-              </div>
-
-              <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <dt className="truncate text-sm font-medium text-gray-500">
-                  Tempo
-                </dt>
-                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-                  {generation && generation.tempo}
-                </dd>
-              </div>
-
-              <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <dt className="truncate text-sm font-medium text-gray-500">
-                  Style
-                </dt>
-                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-                  {generation && generation.style}
-                </dd>
-              </div>
-            </dl>
-
-            {/* {loadingTab ? (
-              <div className="text-center">
-                <div role="status">
-                  <svg
-                    aria-hidden="true"
-                    className="my-10 mr-2 inline h-8 w-8 animate-spin fill-indigo-600 text-gray-200 dark:text-gray-600"
-                    viewBox="0 0 100 101"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                      fill="currentFill"
-                    />
-                  </svg>
-                  <span className="sr-only">Loading...</span>
-                </div>
-              </div>
-            ) : (
-              !tab &&
-              prompt.instrument == 'Guitar' && (
-                <button
-                  disabled={
-                    loading ||
-                    prompt.instrument !== 'Guitar' ||
-                    generation.result === undefined ||
-                    tab
-                  }
-                  onClick={generateGuitarTab}
-                  className="mt-8 rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
-                >
-                  Generate Tab <span aria-hidden="true">→</span>
-                </button>
-              )
-            )} */}
-
-            {generation && prompt.instrument === 'Guitar' && (
-              <div className="mt-4">
-                <div className="rounded-lg  px-4 py-5  sm:p-6">
-                  <h3 className="pb-1 text-base font-semibold leading-6 text-gray-800 ">
-                    Chord Tabs
-                  </h3>
-                  <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    {generation &&
-                      uniqueChords.map((c, i) => (
-                        <div
-                          key={i}
-                          className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6"
-                        >
-                          <dt className="truncate text-sm font-semibold text-gray-500">
-                            {c.chord}
-                          </dt>
-                          <dd className="mt-1 text-xl font-semibold uppercase tracking-wider text-gray-800">
-                            {c.tab.toString()}
-                          </dd>
-                        </div>
-                      ))}
-                  </dl>
-                </div>
-              </div>
-            )}
-
-            {loadingExplanation ? (
-              <div className="mt-4 text-center">
-                <div role="status">
-                  <svg
-                    aria-hidden="true"
-                    className="my-6 mr-2 inline h-8 w-8 animate-spin fill-pink-500 text-gray-200 dark:text-gray-600"
-                    viewBox="0 0 100 101"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                      fill="currentFill"
-                    />
-                  </svg>
-                  <span className="sr-only">Loading...</span>
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Hold tight, this can take up to 15 seconds!
+        <div className="mt-4 py-4">
+          {hasGeneration && (
+            <div>
+              <h3 className="pb-6 text-base font-semibold leading-6 text-gray-800 ">
+                Progression
+              </h3>
+              <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
+                <h3 className="rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
+                  {state.generation.result.map((chord, index) => (
+                    <Fragment key={index}>
+                      <span className={'px-0.5 text-pink-500'}>{chord} </span>
+                      {state.generation.result.length >= 6 &&
+                        state.generation.result.length < 12 &&
+                        index === 3 && <br />}
+                      {state.generation.result.length >= 12 &&
+                        state.generation.result.length < 16 &&
+                        index === 7 && <br />}
+                      {state.generation.result.length >= 16 && index === 11 && (
+                        <br />
+                      )}
+                    </Fragment>
+                  ))}
+                </h3>
+                {state.generation && state.prompt.instrument === 'Guitar' && (
+                  <p className="text-md  leading-8 text-pink-600">
+                    Strumming Pattern:{' '}
+                    {state.generation && state.generation.strumming_pattern}
+                  </p>
+                )}
+                <p className="text-md  leading-8 text-gray-700">
+                  {state.generation && state.generation.context}
                 </p>
               </div>
-            ) : (
-              <>
-                {generation && !explanation && (
-                  <button
-                    disabled={loading || generation.result === undefined}
-                    onClick={generateExplanation}
-                    className=" mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
-                  >
-                    Explanation&nbsp;<span aria-hidden="true">→</span>
-                  </button>
-                )}
-              </>
-            )}
+            </div>
+          )}
 
-            {explanation && generation && !loadingExplanation && (
-              <>
-                <h3 className="mt-8 text-base font-semibold leading-6 text-gray-800 ">
-                  Explanation
-                </h3>
-                <div className="mt-6 rounded-lg bg-white shadow">
-                  <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
-                    <div className="mx-auto max-w-4xl divide-y divide-black/10">
-                      <dl className="space-y-6 divide-y divide-black/10">
-                        {explanation.result.map((x, index) => (
-                          <Disclosure
-                            as="div"
-                            key={x.topic}
-                            className={index === 0 ? '' : 'pt-6'}
-                          >
-                            {({ open }) => (
-                              <>
-                                <dt>
-                                  <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
-                                    <span className="text-base font-semibold leading-7">
-                                      {x.topic}
-                                    </span>
-                                    <span className="ml-6 flex h-7 items-center">
-                                      {open ? (
-                                        <MinusSmallIcon
-                                          className="h-6 w-6"
-                                          aria-hidden="true"
-                                        />
-                                      ) : (
-                                        <PlusSmallIcon
-                                          className="h-6 w-6"
-                                          aria-hidden="true"
-                                        />
-                                      )}
-                                    </span>
-                                  </Disclosure.Button>
-                                </dt>
-                                <Disclosure.Panel
-                                  as="dd"
-                                  className="mt-2 pr-12 text-left"
-                                >
-                                  <p className="text-left text-base leading-7 text-gray-600">
-                                    {x.explanation}
-                                  </p>
-                                </Disclosure.Panel>
-                              </>
-                            )}
-                          </Disclosure>
-                        ))}
-                      </dl>
-                    </div>
-                  </div>
+          {hasGeneration && (
+            <div>
+              <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+                <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                  <dt className="truncate text-sm font-medium text-gray-500">
+                    Key
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+                    {state.generation && state.generation.key}
+                  </dd>
                 </div>
-              </>
-            )}
-          </div>
-        )}
+
+                <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                  <dt className="truncate text-sm font-medium text-gray-500">
+                    Tempo
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+                    {state.generation && state.generation.tempo}
+                  </dd>
+                </div>
+
+                <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                  <dt className="truncate text-sm font-medium text-gray-500">
+                    Style
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+                    {state.generation && state.generation.style}
+                  </dd>
+                </div>
+              </dl>
+
+              {state.generation &&
+                state.prompt.instrument === 'Guitar' &&
+                renderChordTabs()}
+
+              {state.loadingExplanation
+                ? renderLoadingIndicator()
+                : renderExplanationButton()}
+
+              {hasExplanation &&
+                !state.loadingExplanation &&
+                renderExplanation()}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+
   return (
     <>
       <Head>
-        <title>ChordCraft | AI Music Generator</title>
-        <meta
-          name="description"
-          content="Generate chord progressions, tablature and more with AI using ChatGPT."
-        />
         <link rel="icon" href="/chord.png" />
       </Head>
       <div className="pb-12 sm:pb-4 ">
@@ -935,9 +759,9 @@ export default function Home() {
             </div>
             <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
               <div className="text-center">
-                {Hero}
+                {Hero()}
                 {UserSelectionMenus}
-                {GenerationSection}
+                {GenerationSection()}
               </div>
             </div>
             <div

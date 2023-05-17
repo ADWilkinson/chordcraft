@@ -3,14 +3,21 @@ import { Configuration, OpenAIApi } from 'openai'
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 })
+
+if (!configuration.apiKey) {
+  console.error(
+    'OpenAI API key not configured, please follow instructions in README.md'
+  )
+  process.exit(1)
+}
+
 const openai = new OpenAIApi(configuration)
 
 export default async function (req, res) {
-  if (!configuration.apiKey) {
-    res.status(500).json({
+  if (!req.body) {
+    res.status(400).json({
       error: {
-        message:
-          'OpenAI API key not configured, please follow instructions in README.md',
+        message: 'Please enter a valid request body',
       },
     })
     return
@@ -20,7 +27,7 @@ export default async function (req, res) {
   const style = req.body.style || null
   const key = req.body.key || null
   const history = req.body.history || null
-  if ((chords === null || style === null || key === null, history === null)) {
+  if (!chords || !style || !key || !history) {
     res.status(400).json({
       error: {
         message: 'Please enter a valid userInput',
@@ -29,13 +36,12 @@ export default async function (req, res) {
     return
   }
 
+  const explanation = generateExplanation(chords, style, key)
+
   try {
     const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
-      messages: [
-        ...history,
-        { role: 'user', content: generateExplanation(chords, style, key) },
-      ],
+      messages: [...history, { role: 'user', content: explanation }],
       temperature: 0.8,
       max_tokens: 1024,
       top_p: 1,
@@ -44,17 +50,24 @@ export default async function (req, res) {
       stream: false,
     })
 
+    if (
+      !completion.data ||
+      !completion.data.choices[0] ||
+      !completion.data.choices[0].message.content
+    ) {
+      throw new Error('Unexpected response format from OpenAI API')
+    }
+
     const content = completion.data.choices[0].message.content
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
 
     res.status(200).json({
-      result: json,
-      input: generateExplanation(chords, style, key),
+      result: JSON.parse(json),
+      input: explanation,
     })
   } catch (error) {
-    // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data)
       res.status(error.response.status).json(error.response.data)

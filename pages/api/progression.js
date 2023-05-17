@@ -3,21 +3,18 @@ import { Configuration, OpenAIApi } from 'openai'
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 })
+
+if (!configuration.apiKey) {
+  console.error(
+    'OpenAI API key not configured, please follow instructions in README.md'
+  )
+  process.exit(1)
+}
+
 const openai = new OpenAIApi(configuration)
 
 export default async function (req, res) {
-  if (!configuration.apiKey) {
-    res.status(500).json({
-      error: {
-        message:
-          'OpenAI API key not configured, please follow instructions in README.md',
-      },
-    })
-    return
-  }
-
-  const userInput = req.body.userInput || null
-  if (userInput === null) {
+  if (!req.body || !req.body.userInput) {
     res.status(400).json({
       error: {
         message: 'Please enter a valid userInput',
@@ -26,10 +23,13 @@ export default async function (req, res) {
     return
   }
 
+  const userInput = req.body.userInput
+  const prompt = generatePrompt(userInput)
+
   try {
     const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: generatePrompt(userInput) }],
+      messages: [{ role: 'user', content: prompt }],
       temperature: 0.8,
       max_tokens: 512,
       top_p: 1,
@@ -38,17 +38,24 @@ export default async function (req, res) {
       stream: false,
     })
 
+    if (
+      !completion.data ||
+      !completion.data.choices[0] ||
+      !completion.data.choices[0].message.content
+    ) {
+      throw new Error('Unexpected response format from OpenAI API')
+    }
+
     const content = completion.data.choices[0].message.content
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
 
     res.status(200).json({
-      result: json,
-      input: generatePrompt(userInput),
+      result: JSON.parse(json),
+      input: prompt,
     })
   } catch (error) {
-    // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data)
       res.status(error.response.status).json(error.response.data)
@@ -73,7 +80,7 @@ context: a description of the chord progression provided.
 key: what key the chord progression is in.
 scale: what scale the chord progression is in.
 tempo: what tempo the chord progression should be played in.
-style: what style of music the chord progression is categorised as.
+style: what style of music the chord progression is categorized as.
 ${
   instrument === 'Guitar'
     ? "fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format 'X-X-X-X-X-X'."
@@ -85,5 +92,5 @@ ${
     : ''
 }
 
-Your response message must be valid JSON with no other text above or below.  `
+Your response message must be valid JSON with no other text above or below.`
 }
