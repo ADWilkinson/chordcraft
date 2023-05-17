@@ -37,7 +37,16 @@ export default async function (req, res) {
       presence_penalty: 0,
       stream: false,
     })
-    res.status(200).json({ result: completion.data.choices[0].message.content })
+
+    const content = completion.data.choices[0].message.content
+    let start = content.indexOf('{')
+    let end = content.lastIndexOf('}') + 1
+    let json = content.substring(start, end)
+
+    res.status(200).json({
+      result: json,
+      input: generatePrompt(userInput),
+    })
   } catch (error) {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {

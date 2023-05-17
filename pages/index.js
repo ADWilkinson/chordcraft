@@ -26,10 +26,12 @@ export default function Home() {
   const [explanation, setExplanation] = useState()
   const [loadingExplanation, setLoadingExplanation] = useState(false)
   const [showError, setShowError] = useState(false)
+  const [promptHistory, setPromptHistory] = useState([])
 
   useEffect(() => {
     setGeneration()
     setExplanation()
+    setPromptHistory([])
   }, [prompt.instrument, prompt.style, prompt.mood])
 
   useEffect(() => {
@@ -62,6 +64,15 @@ export default function Home() {
       }
 
       setGeneration(JSON.parse(data.result))
+      setPromptHistory([
+        ...promptHistory,
+        { role: 'user', content: data.input },
+        {
+          role: 'assistant',
+          content: data.result,
+        },
+      ])
+
       va.track('progression', prompt)
     } catch (error) {
       // Consider implementing your own error handling logic here
@@ -85,6 +96,7 @@ export default function Home() {
           progression: generation.result.toString(),
           style: generation.style,
           key: generation.key,
+          history: [...promptHistory],
         }),
       })
 
@@ -98,6 +110,15 @@ export default function Home() {
       }
 
       setExplanation(JSON.parse(data.result))
+      setPromptHistory([
+        ...promptHistory,
+        { role: 'user', content: data.input },
+        {
+          role: 'assistant',
+          content: JSON.stringify(data.result.toString),
+        },
+      ])
+
       va.track('explanation', {
         progression: generation.result,
         style: generation.style,
@@ -627,7 +648,11 @@ export default function Home() {
           {generation ? (
             <button
               disabled={loading}
-              onClick={() => setGeneration()}
+              onClick={() => {
+                setGeneration()
+                setExplanation()
+                setPromptHistory([])
+              }}
               className="justify-left mt-6 flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
             >
               <span aria-hidden="true">←</span>&nbsp;New Progression

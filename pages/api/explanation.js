@@ -19,7 +19,8 @@ export default async function (req, res) {
   const chords = req.body.progression || null
   const style = req.body.style || null
   const key = req.body.key || null
-  if (chords === null || style === null || key === null) {
+  const history = req.body.history || null
+  if ((chords === null || style === null || key === null, history === null)) {
     res.status(400).json({
       error: {
         message: 'Please enter a valid userInput',
@@ -32,6 +33,7 @@ export default async function (req, res) {
     const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: [
+        ...history,
         { role: 'user', content: generateExplanation(chords, style, key) },
       ],
       temperature: 0.8,
@@ -41,7 +43,16 @@ export default async function (req, res) {
       presence_penalty: 2,
       stream: false,
     })
-    res.status(200).json({ result: completion.data.choices[0].message.content })
+
+    const content = completion.data.choices[0].message.content
+    let start = content.indexOf('{')
+    let end = content.lastIndexOf('}') + 1
+    let json = content.substring(start, end)
+
+    res.status(200).json({
+      result: json,
+      input: generateExplanation(chords, style, key),
+    })
   } catch (error) {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
