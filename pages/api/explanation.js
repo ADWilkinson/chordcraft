@@ -37,8 +37,8 @@ export default async function (req, res) {
       temperature: 0.8,
       max_tokens: 1024,
       top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
+      frequency_penalty: 2,
+      presence_penalty: 2,
       stream: false,
     })
     res.status(200).json({ result: completion.data.choices[0].message.content })
