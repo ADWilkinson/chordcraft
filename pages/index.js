@@ -7,6 +7,8 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { Fragment } from 'react'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { XMarkIcon } from '@heroicons/react/20/solid'
+import { Disclosure } from '@headlessui/react'
+import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -19,13 +21,14 @@ export default function Home() {
     mood: '',
   })
   const [generation, setGeneration] = useState()
-  // const [tab, setTab] = useState()
   const [loading, setLoading] = useState(false)
-  // const [loadingTab, setLoadingTab] = useState(false)
+  const [explanation, setExplanation] = useState()
+  const [loadingExplanation, setLoadingExplanation] = useState(false)
   const [showError, setShowError] = useState(false)
 
   useEffect(() => {
     setGeneration()
+    setExplanation()
   }, [prompt.instrument, prompt.style, prompt.mood])
 
   useEffect(() => {
@@ -66,36 +69,40 @@ export default function Home() {
     }
   }
 
-  // async function generateGuitarTab(event) {
-  //   if (generation.result === undefined) return
-  //   event.preventDefault()
-  //   try {
-  //     setLoadingTab(true)
-  //     const response = await fetch('/api/tablature', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ generatedChords: generation.result }),
-  //     })
+  async function generateExplanation(event) {
+    if (generation.result === undefined) return
+    event.preventDefault()
+    try {
+      setLoadingExplanation(true)
+      const response = await fetch('/api/explanation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          progression: generation.result,
+          style: generation.style,
+          key: generation.key,
+        }),
+      })
 
-  //     const data = await response.json()
-  //     setLoadingTab(false)
-  //     if (response.status !== 200) {
-  //       throw (
-  //         data.error ||
-  //         new Error(`Request failed with status ${response.status}`)
-  //       )
-  //     }
+      const data = await response.json()
+      setLoadingExplanation(false)
+      if (response.status !== 200) {
+        throw (
+          data.error ||
+          new Error(`Request failed with status ${response.status}`)
+        )
+      }
 
-  //     setTab(JSON.parse(data.result))
-  //   } catch (error) {
-  //     // Consider implementing your own error handling logic here
-  //     console.error(error)
-  //     setLoadingTab(false)
-  //     setShowError(true)
-  //   }
-  // }
+      setExplanation(JSON.parse(data.result))
+    } catch (error) {
+      // Consider implementing your own error handling logic here
+      console.error(error)
+      setLoadingExplanation(false)
+      setShowError(true)
+    }
+  }
 
   const filterChords = (chords) => {
     const uniqueChords = new Set()
@@ -142,7 +149,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="ml-3 w-0 flex-1 pt-0.5">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-800">
                       No response received
                     </p>
                     <p className="mt-1 text-sm text-gray-500">
@@ -173,8 +180,11 @@ export default function Home() {
 
   const Hero = (
     <div className="border-b pb-4">
-      <img className="mx-auto mb-6 h-32 w-32 justify-center" src="/chord.png" />
-      <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+      <img
+        className="mx-auto mb-6 h-24 w-24 justify-center border-black sm:h-32 sm:w-32"
+        src="/chord.png"
+      />
+      <h1 className="text-4xl font-bold tracking-tight text-gray-800 sm:text-6xl">
         ChordCraft
       </h1>
       <p className="mt-6 text-lg leading-8 text-gray-600">
@@ -188,7 +198,7 @@ export default function Home() {
       {/* style */}
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
             {prompt.instrument || 'Instrument'}
             <ChevronDownIcon
               className="-mr-1 h-5 w-5 text-gray-400"
@@ -215,7 +225,7 @@ export default function Home() {
                       setPrompt({ ...prompt, instrument: 'Guitar' })
                     }
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -230,7 +240,7 @@ export default function Home() {
                       setPrompt({ ...prompt, instrument: 'Piano' })
                     }
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -259,7 +269,7 @@ export default function Home() {
                         })
                       }}
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                         'group flex items-center px-4 py-2 text-sm'
                       )}
                       placeholder="Add another"
@@ -283,7 +293,7 @@ export default function Home() {
         className="relative inline-block text-left"
       >
         <div>
-          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
             {prompt.style || 'Style'}
             <ChevronDownIcon
               className="-mr-1 h-5 w-5 text-gray-400"
@@ -308,7 +318,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Jazz' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -321,7 +331,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Blues' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -335,7 +345,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Rock' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -349,7 +359,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Classical' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -363,7 +373,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Gospel' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -377,7 +387,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Country' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -391,7 +401,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, style: 'Pop' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -421,7 +431,7 @@ export default function Home() {
                         })
                       }}
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                         'group flex items-center px-4 py-2 text-sm'
                       )}
                       placeholder="Add another"
@@ -437,7 +447,7 @@ export default function Home() {
       {/* mood */}
       <Menu as="div" className="relative inline-block text-left">
         <div>
-          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
             {prompt.mood || 'Mood'}
             <ChevronDownIcon
               className="-mr-1 h-5 w-5 text-gray-400"
@@ -462,7 +472,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, mood: 'Happy' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -475,7 +485,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, mood: 'Sad' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -489,7 +499,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, mood: 'Energetic' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -503,7 +513,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, mood: 'Relaxing' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -517,7 +527,7 @@ export default function Home() {
                   <div
                     onClick={() => setPrompt({ ...prompt, mood: 'Epic' })}
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -533,7 +543,7 @@ export default function Home() {
                       setPrompt({ ...prompt, mood: 'Melancholic' })
                     }
                     className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                       'block px-4 py-2 text-sm'
                     )}
                   >
@@ -563,7 +573,7 @@ export default function Home() {
                         })
                       }}
                       className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
                         'group flex items-center px-4 py-2 text-sm'
                       )}
                       placeholder="Add another"
@@ -634,7 +644,7 @@ export default function Home() {
       <div className="mt-4 py-4">
         {generation && (
           <div>
-            <h3 className="pb-6 text-base font-semibold leading-6 text-gray-900 ">
+            <h3 className="pb-6 text-base font-semibold leading-6 text-gray-800 ">
               Progression
             </h3>
             <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
@@ -677,7 +687,7 @@ export default function Home() {
                 <dt className="truncate text-sm font-medium text-gray-500">
                   Key
                 </dt>
-                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
                   {generation && generation.key}
                 </dd>
               </div>
@@ -686,7 +696,7 @@ export default function Home() {
                 <dt className="truncate text-sm font-medium text-gray-500">
                   Tempo
                 </dt>
-                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
                   {generation && generation.tempo}
                 </dd>
               </div>
@@ -695,7 +705,7 @@ export default function Home() {
                 <dt className="truncate text-sm font-medium text-gray-500">
                   Style
                 </dt>
-                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
                   {generation && generation.style}
                 </dd>
               </div>
@@ -742,9 +752,9 @@ export default function Home() {
             )} */}
 
             {generation && prompt.instrument === 'Guitar' && (
-              <div className="mt-4 py-4">
+              <div className="mt-4">
                 <div className="rounded-lg  px-4 py-5  sm:p-6">
-                  <h3 className="pb-1 text-base font-semibold leading-6 text-gray-900 ">
+                  <h3 className="pb-1 text-base font-semibold leading-6 text-gray-800 ">
                     Chord Tabs
                   </h3>
                   <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -757,7 +767,7 @@ export default function Home() {
                           <dt className="truncate text-sm font-semibold text-gray-500">
                             {c.chord}
                           </dt>
-                          <dd className="mt-1 text-xl font-semibold uppercase tracking-wider text-gray-900">
+                          <dd className="mt-1 text-xl font-semibold uppercase tracking-wider text-gray-800">
                             {c.tab.toString()}
                           </dd>
                         </div>
@@ -765,6 +775,101 @@ export default function Home() {
                   </dl>
                 </div>
               </div>
+            )}
+
+            {loadingExplanation ? (
+              <div className="mt-4 text-center">
+                <div role="status">
+                  <svg
+                    aria-hidden="true"
+                    className="my-6 mr-2 inline h-8 w-8 animate-spin fill-pink-500 text-gray-200 dark:text-gray-600"
+                    viewBox="0 0 100 101"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                      fill="currentFill"
+                    />
+                  </svg>
+                  <span className="sr-only">Loading...</span>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Hold tight, this can take up to 15 seconds!
+                </p>
+              </div>
+            ) : (
+              <>
+                {generation && !explanation && (
+                  <button
+                    disabled={loading || generation.result === undefined}
+                    onClick={generateExplanation}
+                    className=" mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
+                  >
+                    Explanation&nbsp;<span aria-hidden="true">→</span>
+                  </button>
+                )}
+              </>
+            )}
+
+            {explanation && generation && !loadingExplanation && (
+              <>
+                <h3 className="mt-8 text-base font-semibold leading-6 text-gray-800 ">
+                  Explanation
+                </h3>
+                <div className="mt-6 rounded-lg bg-white shadow">
+                  <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
+                    <div className="mx-auto max-w-4xl divide-y divide-black/10">
+                      <dl className="space-y-6 divide-y divide-black/10">
+                        {explanation.result.map((x, index) => (
+                          <Disclosure
+                            as="div"
+                            key={x.topic}
+                            className={index === 0 ? '' : 'pt-6'}
+                          >
+                            {({ open }) => (
+                              <>
+                                <dt>
+                                  <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
+                                    <span className="text-base font-semibold leading-7">
+                                      {x.topic}
+                                    </span>
+                                    <span className="ml-6 flex h-7 items-center">
+                                      {open ? (
+                                        <MinusSmallIcon
+                                          className="h-6 w-6"
+                                          aria-hidden="true"
+                                        />
+                                      ) : (
+                                        <PlusSmallIcon
+                                          className="h-6 w-6"
+                                          aria-hidden="true"
+                                        />
+                                      )}
+                                    </span>
+                                  </Disclosure.Button>
+                                </dt>
+                                <Disclosure.Panel
+                                  as="dd"
+                                  className="mt-2 pr-12 text-left"
+                                >
+                                  <p className="text-left text-base leading-7 text-gray-600">
+                                    {x.explanation}
+                                  </p>
+                                </Disclosure.Panel>
+                              </>
+                            )}
+                          </Disclosure>
+                        ))}
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}

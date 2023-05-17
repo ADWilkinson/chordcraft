@@ -16,8 +16,10 @@ export default async function (req, res) {
     return
   }
 
-  const chords = req.body.generatedChords || null
-  if (chords === null) {
+  const chords = req.body.progression || null
+  const style = req.body.style || null
+  const key = req.body.key || null
+  if (chords === null || style === null || key === null) {
     res.status(400).json({
       error: {
         message: 'Please enter a valid userInput',
@@ -29,9 +31,11 @@ export default async function (req, res) {
   try {
     const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: generateGuitarTab(chords) }],
-      temperature: 0.2,
-      max_tokens: 256,
+      messages: [
+        { role: 'user', content: generateExplanation(chords, style, key) },
+      ],
+      temperature: 0.8,
+      max_tokens: 1024,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
@@ -54,18 +58,16 @@ export default async function (req, res) {
   }
 }
 
-function generateGuitarTab(chordProgression) {
-  return `Using the following string array that represents a chord progression, represent it in text-based guitar tablature.
+function generateExplanation(chordProgression, style, key) {
+  return `Given we have the following ${style} chord progression in the key of ${key}.
+  
+Chord Progression: ${chordProgression}.
 
-Chord Progression: ${chordProgression.toString()}.
+What information would be helpful to know about it?
 
-Return as a JSON object with the following properties:
+Respond only with a JSON object with the following structure.
 
-result: an array of objects that represent each chord. 
+result: an array of objects with two string properties, "topic" and "explanation".
 
-Each object within the array should have the properties:
-
-chord: the name of the chord.
-tab: the tablature representation of the chord as a single string in the following format: 'X-X-X-X-X-X', with X representing the string number.`
+Your response message must be valid JSON with no other text above or below.`
 }
-

@@ -31,7 +31,7 @@ export default async function (req, res) {
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: generatePrompt(userInput) }],
       temperature: 0.8,
-      max_tokens: 256,
+      max_tokens: 512,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
@@ -74,5 +74,7 @@ ${
   instrument === 'Guitar'
     ? 'strumming_pattern: a relevant strumming pattern for the chord progression.'
     : ''
-}`
+}
+
+Your response message must be valid JSON with no other text above or below.  `
 }
