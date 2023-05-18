@@ -1,4 +1,5 @@
 import { Configuration, OpenAIApi } from 'openai'
+import { kv } from '@vercel/kv'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -50,9 +51,26 @@ export default async function (req, res) {
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
+    let parsed = JSON.parse(json)
+
+    try {
+      await kv.lpush('generationKeys', parsed.result.toString())
+      await kv.hset('p-' + parsed.result.toString(), {
+        generation: {
+          progression: parsed.result,
+          context: parsed.context,
+          key: parsed.key,
+          scale: parsed.scale,
+          tempo: parsed.tempo,
+          style: parsed.style,
+        },
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
     res.status(200).json({
-      result: JSON.parse(json),
+      result: parsed,
       input: prompt,
     })
   } catch (error) {

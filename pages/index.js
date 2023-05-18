@@ -87,6 +87,7 @@ export default function Home() {
       }))
 
       va.track('progression', state.prompt)
+   
     } catch (error) {
       console.error(error)
       setState({
@@ -108,7 +109,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          progression: state.generation.result.toString(),
+          progression: state.generation.result,
           style: state.generation.style,
           key: state.generation.key,
           history: [...state.promptHistory],
@@ -143,6 +144,7 @@ export default function Home() {
         style: state.generation.style,
         key: state.generation.key,
       })
+      
     } catch (error) {
       console.error(error)
       setState({
@@ -230,7 +232,7 @@ export default function Home() {
       />
       <h1 className="text-4xl font-bold tracking-tight text-gray-800 sm:text-6xl">
         ChordCraft
-        <span className="translate-x-2 inline-flex items-center rounded-full tracking-normal bg-pink-50 px-2 py-1 text-sm font-medium text-pink-500 ring-1 ring-inset ring-pink-700/10">
+        <span className="inline-flex translate-x-2 items-center rounded-full bg-pink-50 px-2 py-1 text-sm font-medium tracking-normal text-pink-500 ring-1 ring-inset ring-pink-700/10">
           Alpha
         </span>
       </h1>
@@ -744,7 +746,6 @@ export default function Home() {
   return (
     <>
       <Head>
-        
         <link rel="icon" href="/chord.png" />
       </Head>
       <div className="pb-12 sm:pb-4 ">

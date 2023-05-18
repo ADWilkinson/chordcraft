@@ -1,4 +1,5 @@
 import { Configuration, OpenAIApi } from 'openai'
+import { kv } from '@vercel/kv'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -62,9 +63,19 @@ export default async function (req, res) {
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
+    let parsed = JSON.parse(json)
+
+    console.log(parsed)
+    try {
+      kv.hset('e-' + chords.toString(), {
+        generation: parsed.result,
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
     res.status(200).json({
-      result: JSON.parse(json),
+      result: parsed,
       input: explanation,
     })
   } catch (error) {
@@ -87,7 +98,7 @@ function generateExplanation(chordProgression, style, key) {
   
 Chord Progression:
 """
-${chordProgression}.
+${chordProgression.toString()}.
 """
 
 What information would be helpful to know about it?
