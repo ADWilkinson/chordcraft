@@ -1,25 +1,41 @@
 # ChordCraft
 
+ChordCraft is an innovative tool that enables musicians and producers to generate unique chord progressions using artificial intelligence. By selecting a style, mood, and instrument, users can create new chord progressions through an API that utilizes OpenAI's Chat GPT.
+
+## Features
+
+- Choose from a variety of styles, moods, and instruments.
+- Generate unique chord progressions using AI.
+- Powered by OpenAI's Chat GPT.
+- Easy to use interface.
+
 ## Setup
 
-1. If you don’t have Node.js installed, [install it from here](https://nodejs.org/en/) (Node.js version >= 14.6.0 required)
+### Prerequisites
 
-2. Clone this repository
+- Node.js (version >= 14.6.0)
+- [OpenAI API key](https://platform.openai.com/account/api-keys)
 
-3. Navigate into the project directory
+If you don’t have Node.js installed, [install it from here](https://nodejs.org/en/).
 
+### Installation
+
+1. Clone this repository:
    ```bash
-   $ cd openai-quickstart-node
+   $ git clone https://github.com/<your-github-username>/chordcraft.git
    ```
 
-4. Install the requirements
+2. Navigate into the project directory:
+   ```bash
+   $ cd chordcraft
+   ```
 
+3. Install the requirements:
    ```bash
    $ npm install
    ```
 
-5. Make a copy of the example environment variables file
-
+4. Make a copy of the example environment variables file:
    On Linux systems: 
    ```bash
    $ cp .env.example .env
@@ -28,12 +44,24 @@
    ```powershell
    $ copy .env.example .env
    ```
-6. Add your [API key](https://platform.openai.com/account/api-keys) to the newly created `.env` file
 
-7. Run the app
+5. Add your OpenAI API key to the newly created `.env` file.
 
+6. Run the app:
    ```bash
    $ npm run dev
    ```
 
-You should now be able to access the app at [http://localhost:3000](http://localhost:3000)! For the full context behind this example app, check out the [tutorial](https://platform.openai.com/docs/quickstart).
+You should now be able to access the app at [http://localhost:3000](http://localhost:3000)!
+
+## Usage
+
+Select your preferred style, mood, and instrument from the drop-down menus, and then click "Generate" to create a unique chord progression.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+This project is licensed under
