@@ -55,15 +55,26 @@ export default async function (req, res) {
 
     try {
       await kv.lpush('generationKeys', parsed.result.toString())
+
+      let dbEntity = {
+        progression: parsed.result,
+        context: parsed.context,
+        key: parsed.key,
+        scale: parsed.scale,
+        tempo: parsed.tempo,
+        style: parsed.style,
+      }
+
+      if (parsed.strumming_pattern) {
+        dbEntity.strumming_pattern = parsed.strumming_pattern
+      }
+
+      if (parsed.fingering) {
+        dbEntity.fingering = parsed.fingering
+      }
+
       await kv.hset('p-' + parsed.result.toString(), {
-        generation: {
-          progression: parsed.result,
-          context: parsed.context,
-          key: parsed.key,
-          scale: parsed.scale,
-          tempo: parsed.tempo,
-          style: parsed.style,
-        },
+        generation: dbEntity,
       })
     } catch (error) {
       console.error(error)
