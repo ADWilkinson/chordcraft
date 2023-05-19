@@ -472,7 +472,9 @@ export default function Home() {
       state.generation &&
       !state.explanation && (
         <button
-          disabled={state.loadingExplanation || !hasGeneration || state.showError}
+          disabled={
+            state.loadingExplanation || !hasGeneration || state.showError
+          }
           onClick={generateExplanation}
           className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
         >
@@ -545,7 +547,9 @@ export default function Home() {
                           className="mt-2 pr-12 text-left"
                         >
                           <p className="text-left text-base leading-7 text-gray-600">
-                            <ReactMarkdown>{x.explanation}</ReactMarkdown>
+                            <ReactMarkdown>
+                              {x.explanation.replaceAll('<br>', '  \n')}
+                            </ReactMarkdown>
                           </p>
                         </Disclosure.Panel>
                       </>
@@ -645,8 +649,7 @@ export default function Home() {
                 </div>
               </dl>
 
-              {state.generation &&
-                renderChordTabs()}
+              {state.generation && renderChordTabs()}
 
               {state.loadingExplanation
                 ? renderLoadingIndicator()

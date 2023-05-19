@@ -383,8 +383,8 @@ export default function Library() {
                             className="mt-2 pr-12 text-left"
                           >
                             <p className="text-left text-base leading-7 text-gray-600">
-                              <ReactMarkdown >
-                                {x.explanation}
+                              <ReactMarkdown>
+                                {x.explanation.replaceAll('<br>', '  \n')}
                               </ReactMarkdown>
                             </p>
                           </Disclosure.Panel>
