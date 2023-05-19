@@ -106,11 +106,11 @@ Respond only with a JSON object with the following properties:
 
 """
 result: an array of strings representing the chords within the progression.
-context: a description of the chord progression provided.
-key: what key the chord progression is in.
-scale: what scale the chord progression is in.
-tempo: what tempo the chord progression should be played in.
-style: what style of music the chord progression is categorized as.
+context: an interesting description of the chord progression provided as a single string.
+key: what key the chord progression is in as a single string.
+scale: what scale the chord progression is in as a single string.
+tempo: what tempo the chord progression should be played in as a single string.
+style: what style of music the chord progression is as a single string.
 ${
   instrument === 'Guitar'
     ? "fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format 'X-X-X-X-X-X'."
@@ -118,7 +118,7 @@ ${
 }
 ${
   instrument === 'Guitar'
-    ? 'strumming_pattern: a relevant strumming pattern for the chord progression.'
+    ? 'strumming_pattern: an example strumming pattern that could be used for the chord progression as a single string.'
     : ''
 }
 """

@@ -44,7 +44,7 @@ export default async function (req, res) {
       model: 'gpt-3.5-turbo',
       messages: [...history, { role: 'user', content: explanation }],
       temperature: 0.8,
-      max_tokens: 1024,
+      max_tokens: 2048,
       top_p: 1,
       frequency_penalty: 2,
       presence_penalty: 2,
