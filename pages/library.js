@@ -317,10 +317,7 @@ export default function Library() {
 
     const renderExplanation = () => (
       <>
-        <h3 className="mt-8 text-base font-semibold leading-6 text-gray-800 ">
-          Explanation
-        </h3>
-        <div className="mt-6 rounded-lg bg-white shadow">
+        <div className="mt-4 rounded-lg bg-white shadow">
           <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
             <div className="mx-auto max-w-4xl divide-y divide-black/10">
               <dl className="space-y-6 divide-y divide-black/10">

@@ -581,10 +581,7 @@ export default function Home() {
 
     const renderExplanation = () => (
       <>
-        <h3 className="mt-8 text-base font-semibold leading-6 text-gray-800 ">
-          Explanation
-        </h3>
-        <div className="mt-6 rounded-lg bg-white shadow">
+        <div className="mt-4 rounded-lg bg-white shadow">
           <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
             <div className="mx-auto max-w-4xl divide-y divide-black/10">
               <dl className="space-y-6 divide-y divide-black/10">
@@ -660,9 +657,6 @@ export default function Home() {
         <div className="mt-4 py-4">
           {hasGeneration && (
             <div>
-              <h3 className="pb-6 text-base font-semibold leading-6 text-gray-800 ">
-                Progression
-              </h3>
               <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
                 <h3 className="rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
                   {state.generation.result.map((chord, index) => (
