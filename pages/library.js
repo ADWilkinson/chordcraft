@@ -103,11 +103,12 @@ export default function Library() {
     }
   }
 
-  async function fetchProgression() {
+  async function fetchProgression(force = false) {
+
     if (!library[position]) return
 
     const cached = cache.find((item) => item.key === library[position])
-    if (cached) {
+    if (cached && !force) {
       setCurrent(cached)
       return
     }
@@ -163,7 +164,7 @@ export default function Library() {
         }),
       })
 
-      await fetchProgression()
+      await fetchProgression(true)
 
       setLoadingExplanation(false)
 
