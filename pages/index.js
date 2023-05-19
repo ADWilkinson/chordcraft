@@ -11,6 +11,7 @@ import { Disclosure } from '@headlessui/react'
 import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 import va from '@vercel/analytics'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -48,7 +49,7 @@ export default function Home() {
     if (state.showError) {
       setTimeout(() => {
         setState(() => ({ ...state, showError: false }))
-      }, 5000)
+      }, 3000)
     }
   }, [state.showError])
 
@@ -497,7 +498,7 @@ export default function Home() {
 
   const GenerationSection = () => {
     const hasGeneration = state.generation && state.generation.result
-    const hasExplanation = state.explanation && state.explanation.result
+    const hasExplanation = state.explanation && state.explanation.length > 0
 
     const renderLoadingIndicator = () => (
       <div className="mt-4 text-center">
@@ -532,7 +533,8 @@ export default function Home() {
           state.loading ||
           state.prompt.instrument === '' ||
           state.prompt.mood === '' ||
-          state.prompt.style === ''
+          state.prompt.style === '' ||
+          state.showError
         }
         onClick={generateProgression}
         className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
@@ -545,7 +547,7 @@ export default function Home() {
       state.generation &&
       !state.explanation && (
         <button
-          disabled={state.loadingExplanation || !hasGeneration}
+          disabled={state.loadingExplanation || !hasGeneration || state.showError}
           onClick={generateExplanation}
           className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
         >
@@ -585,7 +587,7 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
             <div className="mx-auto max-w-4xl divide-y divide-black/10">
               <dl className="space-y-6 divide-y divide-black/10">
-                {state.explanation.result.map((x, index) => (
+                {state.explanation.map((x, index) => (
                   <Disclosure
                     as="div"
                     key={x.topic}
@@ -618,7 +620,7 @@ export default function Home() {
                           className="mt-2 pr-12 text-left"
                         >
                           <p className="text-left text-base leading-7 text-gray-600">
-                            {x.explanation.replace('\n', ' ')}
+                            <ReactMarkdown>{x.explanation}</ReactMarkdown>
                           </p>
                         </Disclosure.Panel>
                       </>

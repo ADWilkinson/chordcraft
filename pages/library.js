@@ -14,6 +14,7 @@ import { Disclosure } from '@headlessui/react'
 import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 import va from '@vercel/analytics'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
 
 const filterChords = (chords) => {
   const uniqueChords = new Set()
@@ -382,7 +383,9 @@ export default function Library() {
                             className="mt-2 pr-12 text-left"
                           >
                             <p className="text-left text-base leading-7 text-gray-600">
-                              {x.explanation.replace('\n', ' ')}
+                              <ReactMarkdown >
+                                {x.explanation}
+                              </ReactMarkdown>
                             </p>
                           </Disclosure.Panel>
                         </>
