@@ -320,7 +320,12 @@ export default function Library() {
                   <dt className="truncate text-sm font-semibold text-gray-500">
                     {c.chord}
                   </dt>
-                  <dd className="mt-1 text-xl font-semibold uppercase tracking-wider text-gray-800">
+                  <dd
+                    className={
+                      (c.tab.toString().length > 13 ? ' text-sm ' : ' text-xl ') +
+                      'mt-1  font-semibold uppercase tracking-wider text-gray-800'
+                    }
+                  >
                     {c.tab.toString()}
                   </dd>
                 </div>

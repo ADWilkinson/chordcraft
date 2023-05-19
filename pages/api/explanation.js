@@ -104,8 +104,8 @@ What information would be helpful to know about it?
 
 Respond only with a JSON object with the following structure:
 """
-result: an array of objects with two string properties, "topic" and "explanation".
+result: an array of objects with each having two properties of the type string, the properties are called "topic" and "explanation" and the content should be detailed information, with a focus the music theory.
 """
 
-Your response message must be valid JSON with no other text above or below. Be Concise with your explanations and without repeating yourself..`
+Your response message must be valid JSON with no other text above or below. Be Concise with your explanations and without repeating yourself.`
 }
