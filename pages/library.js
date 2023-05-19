@@ -470,14 +470,15 @@ export default function Library() {
 
           {hasGeneration && (
             <div>
-              <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-4">
                 <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
                   <dt className="truncate text-sm font-medium text-gray-500">
                     Key
                   </dt>
-                  <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+                  <dd className="mt-1 text-xl font-semibold tracking-tight text-gray-800">
                     {current.progression[variationPosition] &&
                       current.progression[variationPosition].key}
+                    <br />
                   </dd>
                 </div>
 
@@ -485,7 +486,7 @@ export default function Library() {
                   <dt className="truncate text-sm font-medium text-gray-500">
                     Tempo
                   </dt>
-                  <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+                  <dd className="mt-1 text-xl font-semibold tracking-tight text-gray-800">
                     {current.progression[variationPosition] &&
                       current.progression[variationPosition].tempo}
                   </dd>
@@ -495,11 +496,22 @@ export default function Library() {
                   <dt className="truncate text-sm font-medium text-gray-500">
                     Style
                   </dt>
-                  <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+                  <dd className="mt-1 text-xl font-semibold tracking-tight text-gray-800">
                     {current.progression[variationPosition] &&
                       current.progression[variationPosition].style}
                   </dd>
                 </div>
+
+                <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                  <dt className="truncate text-sm font-medium text-gray-500">
+                    Scale
+                  </dt>
+                  <dd className="mt-1 text-xl font-semibold tracking-tight text-gray-800">
+                    {current.progression[variationPosition] &&
+                      current.progression[variationPosition].scale}
+                  </dd>
+                </div>
+
               </dl>
 
               {current.progression[variationPosition] &&
