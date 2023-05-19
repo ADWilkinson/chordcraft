@@ -97,7 +97,6 @@ function generateExplanation(chordProgression, style, key) {
 Chord Progression:
 ${chordProgression.toString()}.
 
-
 What information would be helpful to know about it?
 
 Respond only with a JSON object with the following structure:

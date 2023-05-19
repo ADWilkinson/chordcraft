@@ -618,7 +618,7 @@ export default function Home() {
                           className="mt-2 pr-12 text-left"
                         >
                           <p className="text-left text-base leading-7 text-gray-600">
-                            {x.explanation}
+                            {x.explanation.replace('\n', ' ')}
                           </p>
                         </Disclosure.Panel>
                       </>

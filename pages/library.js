@@ -105,7 +105,6 @@ export default function Library() {
   }
 
   async function fetchProgression(force = false) {
-  
     if (!library[position]) return
 
     const cached = cache.find((item) => item.key === library[position])
@@ -292,7 +291,9 @@ export default function Library() {
     const hasGeneration =
       current.progression && current.progression[variationPosition]
     const hasExplanation =
-      current.explanation && current.explanation[variationPosition] && current.explanation[variationPosition].result
+      current.explanation &&
+      current.explanation[variationPosition] &&
+      current.explanation[variationPosition].result
 
     const renderExplanationButton = () =>
       current.progression[variationPosition] &&
@@ -381,7 +382,7 @@ export default function Library() {
                             className="mt-2 pr-12 text-left"
                           >
                             <p className="text-left text-base leading-7 text-gray-600">
-                              {x.explanation}
+                              {x.explanation.replace('\n', ' ')}
                             </p>
                           </Disclosure.Panel>
                         </>
