@@ -75,7 +75,6 @@ export default async function (req, res) {
       result: parsed.result,
       input: explanation,
     })
-
   } catch (error) {
     if (error.response) {
       console.error(error.response.status, error.response.data)
@@ -92,18 +91,17 @@ export default async function (req, res) {
 }
 
 function generateExplanation(chordProgression, style, key) {
-  return `Given we have the following ${style} chord progression in the key of ${key}.
-  
-Chord Progression:
-${chordProgression.toString()}.
+  return `I have the following ${style} chord progression in the key of ${key}. 
 
-What information would be helpful to know about it?
+Chord Progression: ${chordProgression.toString()}.
 
-Respond only with a JSON object with the following structure:
+ Provide detailed education, with a focus on music theory around the provided chord progression.
 
-result: an array of objects with each having two properties of the type string, the properties are called "topic" and "explanation" and the content should be detailed information, with a focus the music theory.
-
+Respond only with a valid JSON object with the following data structure:
 Data structure: [{ "topic": string, "explanation": string }]
 
-Your response message must be valid JSON with no other text above or below. Be Concise with your explanations and without repeating yourself.`
+The "explanation" property should be a string of Markdown formatted text.
+
+Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.
+`
 }
