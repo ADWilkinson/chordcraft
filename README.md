@@ -1,10 +1,10 @@
 # ChordCraft
 
-ChordCraft is an innovative tool that enables musicians and producers to generate unique chord progressions using artificial intelligence. By selecting a style, mood, and instrument, users can create new chord progressions through an API that utilizes OpenAI's Chat GPT.
+ChordCraft is an innovative tool that enables musicians and producers to generate unique chord progressions using artificial intelligence. By selecting a style and mood, users can create new chord progressions through an API that utilizes OpenAI's Chat GPT.
 
 ## Features
 
-- Choose from a variety of styles, moods, and instruments.
+- Choose from a variety of styles and moods,.
 - Generate unique chord progressions using AI.
 - Powered by OpenAI's Chat GPT.
 - Easy to use interface.
@@ -56,7 +56,7 @@ You should now be able to access the app at [http://localhost:3000](http://local
 
 ## Usage
 
-Select your preferred style, mood, and instrument from the drop-down menus, and then click "Generate" to create a unique chord progression.
+Select your preferred style and mood from the drop-down menus, and then click "Generate" to create a unique chord progression.
 
 ## Contributing
 

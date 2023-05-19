@@ -30,7 +30,6 @@ const filterChords = (chords) => {
 
 const initialState = {
   prompt: {
-    instrument: '',
     style: '',
     mood: '',
   },
@@ -238,7 +237,7 @@ export default function Home() {
       </h1>
 
       <p className="mt-6 text-lg leading-8 text-gray-600">
-        Select an instrument, style, and mood to generate something new to play.
+        Select a style and mood to generate something new to play.
       </p>
     </div>
   )
@@ -253,13 +252,6 @@ export default function Home() {
                 setState((prevState) => ({
                   ...prevState,
                   prompt: { ...prevState.prompt, style: itemName },
-                }))
-              }
-
-              if (property === 'instrument') {
-                setState((prevState) => ({
-                  ...prevState,
-                  prompt: { ...prevState.prompt, instrument: itemName },
                 }))
               }
 
@@ -284,72 +276,6 @@ export default function Home() {
 
   const UserSelectionMenus = !state.generation && (
     <div className="mt-6 flex items-center justify-center gap-x-6">
-      {/* style */}
-      <Menu as="div" className="relative inline-block text-left">
-        <div>
-          <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-            {state.prompt.instrument || 'Instrument'}
-            <ChevronDownIcon
-              className="-mr-1 h-5 w-5 text-gray-400"
-              aria-hidden="true"
-            />
-          </Menu.Button>
-        </div>
-
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        >
-          <Menu.Items className="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-            <div className="py-1">
-              {['Guitar', 'Piano'].map((item) =>
-                createMenuItem('instrument', item)
-              )}
-
-              <Menu.Item>
-                {({ active }) => (
-                  <>
-                    <input
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          setState({
-                            ...state,
-                            prompt: {
-                              ...state.prompt,
-                              instrument: e.target.value,
-                            },
-                          })
-                        }
-                      }}
-                      onChange={(e) => {
-                        e.preventDefault()
-
-                        setState({
-                          prompt: {
-                            ...state.prompt,
-                            instrument: e.target.value,
-                          },
-                        })
-                      }}
-                      className={classNames(
-                        active ? 'bg-gray-100 text-gray-800' : 'text-gray-700',
-                        'group flex items-center px-4 py-2 text-sm'
-                      )}
-                      placeholder="Add another"
-                    />
-                  </>
-                )}
-              </Menu.Item>
-            </div>
-          </Menu.Items>
-        </Transition>
-      </Menu>
-
       {/* style */}
       <Menu as="div" className="relative inline-block text-left">
         <div>
@@ -531,7 +457,6 @@ export default function Home() {
       <button
         disabled={
           state.loading ||
-          state.prompt.instrument === '' ||
           state.prompt.mood === '' ||
           state.prompt.style === '' ||
           state.showError
@@ -676,7 +601,7 @@ export default function Home() {
                     </Fragment>
                   ))}
                 </h3>
-                {state.generation && state.prompt.instrument === 'Guitar' && (
+                {state.generation && (
                   <p className="text-md  leading-8 text-pink-600">
                     Strumming Pattern:{' '}
                     {state.generation && state.generation.strumming_pattern}
@@ -721,7 +646,6 @@ export default function Home() {
               </dl>
 
               {state.generation &&
-                state.prompt.instrument === 'Guitar' &&
                 renderChordTabs()}
 
               {state.loadingExplanation

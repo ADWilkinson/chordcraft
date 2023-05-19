@@ -103,27 +103,22 @@ export default async function (req, res) {
   }
 }
 
-function generatePrompt({ mood, style, instrument }) {
-  return `Create a ${mood} chord progression playable on ${instrument} in the style of ${style}.
+function generatePrompt({ mood, style }) {
+  return `Create a ${mood} chord progression in the style of ${style}.
+Respond only with a valid JSON object with the following data structure:
 
-Respond only with a JSON object with the following properties:
+Data structure:  { "result": string[], "context": string, "key": string, "scale": string, "tempo": string, "style": string, "tempo": string, "fingering": string, "strumming_pattern": string }
 
-result: an array of strings representing the chords within the progression.
+Here is a description of each property within the JSON object:
+
+result: an array of strings representing the chords within the progression formatted in the style of "Am" for "A minor".
 context: an interesting description of the chord progression provided as a single string.
 key: what key the chord progression is in as a single string.
 scale: what scale the chord progression is in as a single string.
 tempo: what tempo the chord progression should be played in as a single string.
 style: what style of music the chord progression is as a single string.
-${
-  instrument === 'Guitar'
-    ? "fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format 'X-X-X-X-X-X'."
-    : ''
-}
-${
-  instrument === 'Guitar'
-    ? 'strumming_pattern: an example strumming pattern that could be used for the chord progression as a single string.'
-    : ''
-}
+fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format "X-X-X-X-X-X"
+strumming_pattern: an example strumming pattern that could be used for the chord progression as a single string.
 
-Your response message must be valid JSON with no other text above or below. Be concise with your response.`
+Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.`
 }

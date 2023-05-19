@@ -16,7 +16,7 @@ export default function App({ Component, pageProps }) {
         />
         <meta
           name="description"
-          content="Discover new chord progressions for your music with our AI-powered tool. Choose your style, mood, and instrument and let our AI create unique progressions for you."
+          content="Discover new chord progressions for your music with our AI-powered tool. Choose your style and mood and let our AI create unique progressions for you."
         />
         <meta
           name="keywords"
@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }) {
         />
         <meta
           property="og:description"
-          content="Discover new chord progressions for your music with our AI-powered tool. Choose your style, mood, and instrument and let our AI create unique progressions for you."
+          content="Discover new chord progressions for your music with our AI-powered tool. Choose your style and mood and let our AI create unique progressions for you."
         />
         <meta
           property="og:image"
@@ -44,7 +44,7 @@ export default function App({ Component, pageProps }) {
         />
         <meta
           property="twitter:description"
-          content="Discover new chord progressions for your music with our AI-powered tool. Choose your style, mood, and instrument and let our AI create unique progressions for you."
+          content="Discover new chord progressions for your music with our AI-powered tool. Choose your style and mood and let our AI create unique progressions for you."
         />
         <meta
           property="twitter:image"
