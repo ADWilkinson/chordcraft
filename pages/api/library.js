@@ -2,7 +2,7 @@ import { kv } from '@vercel/kv'
 
 export default async function (req, res) {
   try {
-    const list = await kv.lrange('generationKeys', 0, -1)
+    const list = await kv.lrange('genKeys', 0, -1)
 
     res.status(200).json({
       result: list,

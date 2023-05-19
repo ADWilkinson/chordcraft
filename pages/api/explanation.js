@@ -66,9 +66,7 @@ export default async function (req, res) {
     let parsed = JSON.parse(json)
 
     try {
-      kv.hset('e-' + chords.toString(), {
-        generation: parsed.result,
-      })
+      await kv.lpush('theory-' + chords.toString(), json)
     } catch (error) {
       console.error(error)
     }
@@ -77,6 +75,7 @@ export default async function (req, res) {
       result: parsed,
       input: explanation,
     })
+
   } catch (error) {
     if (error.response) {
       console.error(error.response.status, error.response.data)
@@ -106,7 +105,6 @@ Respond only with a JSON object with the following structure:
 result: an array of objects with each having two properties of the type string, the properties are called "topic" and "explanation" and the content should be detailed information, with a focus the music theory.
 
 Data structure: [{ "topic": string, "explanation": string }]
-
 
 Your response message must be valid JSON with no other text above or below. Be Concise with your explanations and without repeating yourself.`
 }

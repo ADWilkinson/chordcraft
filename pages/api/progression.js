@@ -54,7 +54,12 @@ export default async function (req, res) {
     let parsed = JSON.parse(json)
 
     try {
-      await kv.lpush('generationKeys', parsed.result.toString())
+      const list = await kv.lrange('genKeys', 0, -1)
+      if (list.includes(parsed.result.toString())) {
+        console.log('Key exists in KV, skipping DB write')
+      } else {
+        await kv.lpush('genKeys', parsed.result.toString())
+      }
 
       let dbEntity = {
         progression: parsed.result,
@@ -73,9 +78,8 @@ export default async function (req, res) {
         dbEntity.fingering = parsed.fingering
       }
 
-      await kv.hset('p-' + parsed.result.toString(), {
-        generation: dbEntity,
-      })
+      await kv.lpush('progression-' + parsed.result.toString(), json)
+      
     } catch (error) {
       console.error(error)
     }

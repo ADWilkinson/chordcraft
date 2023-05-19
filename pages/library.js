@@ -44,7 +44,8 @@ export default function Library() {
   const [library, setLibrary] = useState([])
   const [loading, setLoading] = useState(false)
   const [position, setPosition] = useState(0)
-  const [current, setCurrent] = useState(null)
+  const [variationPosition, setVariationPosition] = useState(0)
+  const [current, setCurrent] = useState({})
   const [showError, setShowError] = useState(false)
   const [loadingExplanation, setLoadingExplanation] = useState(false)
   const [cache, setCache] = useState([])
@@ -104,7 +105,7 @@ export default function Library() {
   }
 
   async function fetchProgression(force = false) {
-
+  
     if (!library[position]) return
 
     const cached = cache.find((item) => item.key === library[position])
@@ -148,7 +149,7 @@ export default function Library() {
 
   async function generateExplanation(event) {
     event.preventDefault()
-    if (!current.progression) return
+    if (!current.progression[variationPosition]) return
     try {
       setLoadingExplanation(true)
       await fetch('/api/explanation', {
@@ -157,9 +158,9 @@ export default function Library() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          progression: current.progression.progression,
-          style: current.progression.style,
-          key: current.progression.key,
+          progression: current.progression[variationPosition].result,
+          style: current.progression[variationPosition].style,
+          key: current.progression[variationPosition].key,
           history: [],
         }),
       })
@@ -169,9 +170,9 @@ export default function Library() {
       setLoadingExplanation(false)
 
       va.track('explanation', {
-        progression: current.progression.progression.toString(),
-        style: current.progression.style,
-        key: current.progression.key,
+        progression: current.progression[variationPosition].result.toString(),
+        style: current.progression[variationPosition].style,
+        key: current.progression[variationPosition].key,
       })
     } catch (error) {
       console.error(error)
@@ -181,11 +182,11 @@ export default function Library() {
   }
 
   const uniqueChords =
-    current &&
-    current.progression &&
-    current.progression.fingering &&
-    current.progression.fingering.length > 0
-      ? filterChords(current.progression.fingering)
+    current.length > 0 &&
+    current.progression[variationPosition] &&
+    current.progression[variationPosition].fingering &&
+    current.progression[variationPosition].fingering.length > 0
+      ? filterChords(current.progression[variationPosition].fingering)
       : []
 
   const ErrorNotification = (
@@ -287,13 +288,15 @@ export default function Library() {
   )
 
   const GenerationSection = () => {
-    if (!current) return <></>
-    const hasGeneration = current.progression
-    const hasExplanation = current.explanation
+    if (current.progression && current.progression.length === 0) return <></>
+    const hasGeneration =
+      current.progression && current.progression[variationPosition]
+    const hasExplanation =
+      current.explanation && current.explanation[variationPosition] && current.explanation[variationPosition].result
 
     const renderExplanationButton = () =>
-      current.progression &&
-      !current.explanation && (
+      current.progression[variationPosition] &&
+      !hasExplanation && (
         <button
           disabled={
             loading || !hasGeneration || hasExplanation || loadingExplanation
@@ -312,7 +315,7 @@ export default function Library() {
             Chord Tabs
           </h3>
           <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-            {current.progression &&
+            {current.progression[variationPosition] &&
               uniqueChords.map((c, i) => (
                 <div
                   key={i}
@@ -323,7 +326,9 @@ export default function Library() {
                   </dt>
                   <dd
                     className={
-                      (c.tab.toString().length > 13 ? ' text-sm ' : ' text-xl ') +
+                      (c.tab.toString().length > 13
+                        ? ' text-sm '
+                        : ' text-xl ') +
                       'mt-1  font-semibold uppercase tracking-wider text-gray-800'
                     }
                   >
@@ -342,46 +347,48 @@ export default function Library() {
           <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
             <div className="mx-auto max-w-4xl divide-y divide-black/10">
               <dl className="space-y-6 divide-y divide-black/10">
-                {current.explanation.map((x, index) => (
-                  <Disclosure
-                    as="div"
-                    key={x.topic}
-                    className={index === 0 ? '' : 'pt-6'}
-                  >
-                    {({ open }) => (
-                      <>
-                        <dt>
-                          <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
-                            <span className="text-base font-semibold leading-7">
-                              {x.topic}
-                            </span>
-                            <span className="ml-6 flex h-7 items-center">
-                              {open ? (
-                                <MinusSmallIcon
-                                  className="h-6 w-6"
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <PlusSmallIcon
-                                  className="h-6 w-6"
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </span>
-                          </Disclosure.Button>
-                        </dt>
-                        <Disclosure.Panel
-                          as="dd"
-                          className="mt-2 pr-12 text-left"
-                        >
-                          <p className="text-left text-base leading-7 text-gray-600">
-                            {x.explanation}
-                          </p>
-                        </Disclosure.Panel>
-                      </>
-                    )}
-                  </Disclosure>
-                ))}
+                {current.explanation[variationPosition].result.map(
+                  (x, index) => (
+                    <Disclosure
+                      as="div"
+                      key={x.topic}
+                      className={index === 0 ? '' : 'pt-6'}
+                    >
+                      {({ open }) => (
+                        <>
+                          <dt>
+                            <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
+                              <span className="text-base font-semibold leading-7">
+                                {x.topic}
+                              </span>
+                              <span className="ml-6 flex h-7 items-center">
+                                {open ? (
+                                  <MinusSmallIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <PlusSmallIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                  />
+                                )}
+                              </span>
+                            </Disclosure.Button>
+                          </dt>
+                          <Disclosure.Panel
+                            as="dd"
+                            className="mt-2 pr-12 text-left"
+                          >
+                            <p className="text-left text-base leading-7 text-gray-600">
+                              {x.explanation}
+                            </p>
+                          </Disclosure.Panel>
+                        </>
+                      )}
+                    </Disclosure>
+                  )
+                )}
               </dl>
             </div>
           </div>
@@ -395,31 +402,63 @@ export default function Library() {
           {hasGeneration && (
             <div>
               <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
+                {current.progression.length > 1 && (
+                  <div className="flex justify-end">
+                    <span className="text-sm" text->
+                      {current.progression.length - 1} variations:&nbsp;
+                    </span>
+                    <button
+                      onClick={() => {
+                        if (
+                          variationPosition <
+                          current.progression.length - 1
+                        ) {
+                          setVariationPosition(variationPosition + 1)
+                        } else {
+                          setVariationPosition(0)
+                        }
+                      }}
+                      className="justify-right flex text-right text-sm  text-pink-500 shadow-sm hover:border-b hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:text-gray-500"
+                    >
+                      Next&nbsp;<span aria-hidden="true">→</span>
+                    </button>
+                  </div>
+                )}
+
                 <h3 className="rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
-                  {current.progression.progression.map((chord, index) => (
-                    <Fragment key={index}>
-                      <span className={'px-0.5 text-pink-500'}>{chord} </span>
-                      {current.progression.progression.length >= 6 &&
-                        current.progression.progression.length < 12 &&
-                        index === 3 && <br />}
-                      {current.progression.progression.length >= 12 &&
-                        current.progression.progression.length < 16 &&
-                        index === 7 && <br />}
-                      {current.progression.progression.length >= 16 &&
-                        index === 11 && <br />}
-                    </Fragment>
-                  ))}
+                  {current.progression[variationPosition].result.map(
+                    (chord, index) => (
+                      <Fragment key={index}>
+                        <span className={'px-0.5 text-pink-500'}>{chord} </span>
+                        {current.progression[variationPosition].result.length >=
+                          6 &&
+                          current.progression[variationPosition].result.length <
+                            12 &&
+                          index === 3 && <br />}
+                        {current.progression[variationPosition].result.length >=
+                          12 &&
+                          current.progression[variationPosition].result.length <
+                            16 &&
+                          index === 7 && <br />}
+                        {current.progression[variationPosition].result.length >=
+                          16 &&
+                          index === 11 && <br />}
+                      </Fragment>
+                    )
+                  )}
                 </h3>
-                {current.progression &&
-                  current.progression.strumming_pattern && (
+                {current.progression[variationPosition] &&
+                  current.progression[variationPosition].strumming_pattern && (
                     <p className="text-md  leading-8 text-pink-600">
                       Strumming Pattern:{' '}
-                      {current.progression &&
-                        current.progression.strumming_pattern}
+                      {current.progression[variationPosition] &&
+                        current.progression[variationPosition]
+                          .strumming_pattern}
                     </p>
                   )}
                 <p className="text-md  leading-8 text-gray-700">
-                  {current.progression && current.progression.context}
+                  {current.progression[variationPosition] &&
+                    current.progression[variationPosition].context}
                 </p>
               </div>
             </div>
@@ -433,7 +472,8 @@ export default function Library() {
                     Key
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-                    {current.progression && current.progression.key}
+                    {current.progression[variationPosition] &&
+                      current.progression[variationPosition].key}
                   </dd>
                 </div>
 
@@ -442,7 +482,8 @@ export default function Library() {
                     Tempo
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-                    {current.progression && current.progression.tempo}
+                    {current.progression[variationPosition] &&
+                      current.progression[variationPosition].tempo}
                   </dd>
                 </div>
 
@@ -451,12 +492,13 @@ export default function Library() {
                     Style
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-                    {current.progression && current.progression.style}
+                    {current.progression[variationPosition] &&
+                      current.progression[variationPosition].style}
                   </dd>
                 </div>
               </dl>
 
-              {current.progression &&
+              {current.progression[variationPosition] &&
                 uniqueChords &&
                 uniqueChords.length > 0 &&
                 renderChordTabs()}
@@ -497,7 +539,7 @@ export default function Library() {
               <div className="text-center">
                 {Hero()}
                 {loading && renderLoadingIndicator()}
-                {!loading && (
+                {!loading && library.length > 1 && (
                   <>
                     <div className="flex justify-center">
                       <button

@@ -6,14 +6,18 @@ export default async function (req, res) {
   const key = generationKey
 
   try {
-    const progression = await kv.hget(
-      'p-' + key.replace('-sharp-', '#'),
-      'generation'
+    const progression = await kv.lrange(
+      'progression-' + key.replace('-sharp-', '#'),
+      0,
+      -1
     )
-    const explanation = await kv.hget(
-      'e-' + key.replace('-sharp-', '#'),
-      'generation'
+
+    const explanation = await kv.lrange(
+      'theory-' + key.replace('-sharp-', '#'),
+      0,
+      -1
     )
+
     res.status(200).json({
       result: {
         progression: progression,
