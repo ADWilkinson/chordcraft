@@ -63,7 +63,7 @@ export default async function (req, res) {
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
-    console.log(json);
+    console.log(json)
     let parsed = JSON.parse(json)
 
     try {
@@ -92,18 +92,32 @@ export default async function (req, res) {
 }
 
 function generateExplanation(chordProgression, style, key) {
-  return `I have the following ${style} chord progression in the key of ${key}. 
+  return `
+Provide detailed education, with a focus on music theory around the suggested chord progression.
 
-Chord Progression: ${chordProgression.toString()}.
-
- Provide detailed education, with a focus on music theory around the provided chord progression.
+Context:
+Chord Progression: ${chordProgression.toString()}
+Style: ${style}
+Key: ${key}
 
 Respond only with a valid JSON object with the following data structure:
-Data structure: { result: [{ "topic": string, "explanation": string }] }
+"""
+{ 
+  result: [
+    { 
+      "topic": string, 
+      "explanation": string 
+    }
+  ] 
+}
+"""
 
-The "topic" property should be a string representing the topic of the explanation.
-The "explanation" property should be a string of Markdown formatted text.
+Property definitions:
+"topic": property should be a single string representing the topic of the explanation. Do not exceed 50 characters.
+"explanation": property should be a well formatted single string representing the content of the topic. Do not exceed 100 words. 
 
-Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.
+Do not nest any other objects within the JSON object.
+Do not use double quotes within the string values of the JSON object, only use single quotes.
+Be Concise with your explanations and send no other text apart from the JSON object.
 `
 }

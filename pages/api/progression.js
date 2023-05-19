@@ -106,12 +106,21 @@ export default async function (req, res) {
 
 function generatePrompt({ mood, style }) {
   return `Create a ${mood} chord progression in the style of ${style}.
+
 Respond only with a valid JSON object with the following data structure:
+{ 
+  "result": string[],
+  "context": string,
+  "key": string, 
+  "scale": string, 
+  "tempo": string, 
+  "style": string, 
+  "tempo": string, 
+  "fingering": string, 
+  "strumming_pattern": string 
+}
 
-Data structure:  { "result": string[], "context": string, "key": string, "scale": string, "tempo": string, "style": string, "tempo": string, "fingering": string, "strumming_pattern": string }
-
-Here is a description of each property within the JSON object:
-
+Property definitions:
 "result": an array of strings representing the chords within the progression formatted in the style of "Am" for "A minor".
 "context": an interesting description of the chord progression provided as a single string.
 "key": what key the chord progression is in as a single string.
@@ -121,5 +130,7 @@ Here is a description of each property within the JSON object:
 "fingering": an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format "X-X-X-X-X-X"
 "strumming_pattern": an example strumming pattern that could be used for the chord progression as a single string.
 
+Do not nest any other objects within the JSON object.
+Do not use double quotes within the string values of the JSON object, only use single quotes.
 Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.`
 }
