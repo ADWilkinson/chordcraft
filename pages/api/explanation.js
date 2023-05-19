@@ -98,7 +98,7 @@ Chord Progression: ${chordProgression.toString()}.
  Provide detailed education, with a focus on music theory around the provided chord progression.
 
 Respond only with a valid JSON object with the following data structure:
-Data structure: [{ "topic": string, "explanation": string }]
+Data structure: { result: [{ "topic": string, "explanation": string }] }
 
 The "explanation" property should be a string of Markdown formatted text.
 
