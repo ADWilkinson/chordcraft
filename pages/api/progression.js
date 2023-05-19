@@ -108,6 +108,7 @@ function generatePrompt({ mood, style }) {
   return `Create a ${mood} chord progression in the style of ${style}.
 
 Respond only with a valid JSON object with the following data structure:
+"""
 { 
   "result": string[],
   "context": string,
@@ -119,18 +120,22 @@ Respond only with a valid JSON object with the following data structure:
   "fingering": string, 
   "strumming_pattern": string 
 }
+"""
 
 Property definitions:
-"result": an array of strings representing the chords within the progression formatted in the style of "Am" for "A minor".
-"context": an interesting description of the chord progression provided as a single string.
-"key": what key the chord progression is in as a single string.
-"scale": what scale the chord progression is in as a single string.
-"tempo": what tempo the chord progression should be played in as a single string.
-"style": what style of music the chord progression is as a single string.
-"fingering": an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format "X-X-X-X-X-X"
-"strumming_pattern": an example strumming pattern that could be used for the chord progression as a single string.
+result: an array of strings representing the chords within the progression formatted in the style of "Am" for "A minor".
+context: an interesting description of the chord progression provided as a single string.
+key: what key the chord progression is in as a single string.
+scale: what scale the chord progression is in as a single string.
+tempo: what tempo the chord progression should be played in as a single string.
+style: what style of music the chord progression is as a single string.
+fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format "X-X-X-X-X-X".
+strumming_pattern: an example strumming pattern that could be used for the chord progression as a single string.
 
-Do not nest any other objects within the JSON object.
-Do not use double quotes within the string values of the JSON object, only use single quotes.
+Rules:
+property names must be lowercase.
+property names must be enclosed in double quotes.
+property values must be enclosed in double quotes.
+Do not nest any other undefined objects within the JSON object.
 Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.`
 }

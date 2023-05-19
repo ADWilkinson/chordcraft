@@ -93,7 +93,7 @@ export default async function (req, res) {
 
 function generateExplanation(chordProgression, style, key) {
   return `
-Provide detailed education, with a focus on music theory around the suggested chord progression.
+Provide 3-5 detailed education points, with a focus on music theory around the suggested chord progression.
 
 Context:
 Chord Progression: ${chordProgression.toString()}
@@ -107,17 +107,30 @@ Respond only with a valid JSON object with the following data structure:
     { 
       "topic": string, 
       "explanation": string 
-    }
+    },
+    { 
+      "topic": string, 
+      "explanation": string 
+    },
+    { 
+      "topic": string, 
+      "explanation": string 
+    },
   ] 
 }
 """
 
 Property definitions:
-"topic": property should be a single string representing the topic of the explanation. Do not exceed 50 characters.
-"explanation": property should be a well formatted single string representing the content of the topic. Do not exceed 100 words. 
+topic: property should be a single string representing the topic of the explanation. Do not exceed 50 characters.
+explanation: property should be a well formatted single string representing the content of the topic. Do not exceed 100 words. 
 
-Do not nest any other objects within the JSON object.
-Do not use double quotes within the string values of the JSON object, only use single quotes.
+Rules:
+property names must be lowercase.
+property names must be enclosed in double quotes.
+property values must be enclosed in double quotes.
+Trim any whitespace from the beginning and end of the string.
+Make sure there is always an explanation for each topic. Both properties must be present.
+Do not nest any other undefined objects within the JSON object.
 Be Concise with your explanations and send no other text apart from the JSON object.
 `
 }
