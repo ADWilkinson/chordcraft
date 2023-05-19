@@ -102,6 +102,7 @@ export default function Library() {
   }
 
   async function fetchProgression() {
+    if (!library[position]) return
     try {
       setLoading(true)
       const response = await fetch(
