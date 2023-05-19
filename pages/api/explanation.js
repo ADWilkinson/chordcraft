@@ -63,6 +63,7 @@ export default async function (req, res) {
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
+    console.log(json);
     let parsed = JSON.parse(json)
 
     try {
@@ -100,6 +101,7 @@ Chord Progression: ${chordProgression.toString()}.
 Respond only with a valid JSON object with the following data structure:
 Data structure: { result: [{ "topic": string, "explanation": string }] }
 
+The "topic" property should be a string representing the topic of the explanation.
 The "explanation" property should be a string of Markdown formatted text.
 
 Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.

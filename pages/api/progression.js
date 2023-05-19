@@ -51,6 +51,7 @@ export default async function (req, res) {
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
+    console.log(json);
     let parsed = JSON.parse(json)
 
     try {
@@ -111,14 +112,14 @@ Data structure:  { "result": string[], "context": string, "key": string, "scale"
 
 Here is a description of each property within the JSON object:
 
-result: an array of strings representing the chords within the progression formatted in the style of "Am" for "A minor".
-context: an interesting description of the chord progression provided as a single string.
-key: what key the chord progression is in as a single string.
-scale: what scale the chord progression is in as a single string.
-tempo: what tempo the chord progression should be played in as a single string.
-style: what style of music the chord progression is as a single string.
-fingering: an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format "X-X-X-X-X-X"
-strumming_pattern: an example strumming pattern that could be used for the chord progression as a single string.
+"result": an array of strings representing the chords within the progression formatted in the style of "Am" for "A minor".
+"context": an interesting description of the chord progression provided as a single string.
+"key": what key the chord progression is in as a single string.
+"scale": what scale the chord progression is in as a single string.
+"tempo": what tempo the chord progression should be played in as a single string.
+"style": what style of music the chord progression is as a single string.
+"fingering": an array of objects representing chord tabs with a property called 'chord' for the chord name and a property called 'tab' for the chord tab in the following string format "X-X-X-X-X-X"
+"strumming_pattern": an example strumming pattern that could be used for the chord progression as a single string.
 
 Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.`
 }
