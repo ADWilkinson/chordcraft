@@ -47,6 +47,8 @@ export default function Library() {
   const [current, setCurrent] = useState(null)
   const [showError, setShowError] = useState(false)
   const [loadingExplanation, setLoadingExplanation] = useState(false)
+  const [cache, setCache] = useState([])
+
   useEffect(() => {
     if (showError) {
       setTimeout(() => {
@@ -72,6 +74,7 @@ export default function Library() {
   }, [position, library])
 
   async function fetchLibrary() {
+    if (library.length > 0) return
     try {
       setLoading(true)
       const response = await fetch('/api/library', {
@@ -90,7 +93,6 @@ export default function Library() {
       }
 
       setLibrary(data.result)
-
       setLoading(false)
 
       va.track('library-fetched')
@@ -103,6 +105,13 @@ export default function Library() {
 
   async function fetchProgression() {
     if (!library[position]) return
+
+    const cached = cache.find((item) => item.key === library[position])
+    if (cached) {
+      setCurrent(cached)
+      return
+    }
+
     try {
       setLoading(true)
       const response = await fetch(
@@ -124,6 +133,8 @@ export default function Library() {
       }
 
       const result = data.result
+
+      setCache([...cache, { key: library[position], ...result }])
       setCurrent(result)
       setLoading(false)
       va.track('library-progression', { progression: library[position] })
