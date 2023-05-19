@@ -57,14 +57,7 @@ export default function Library() {
 
   useEffect(() => {
     fetchLibrary()
-      .then(() => {
-        console.log('Library fetched')
-        fetchProgression()
-          .then(() => console.log('Progression fetched'))
-          .catch((error) => {
-            console.error(error)
-          })
-      })
+      .then(() => console.log('Progressions fetched'))
       .catch((error) => {
         console.error(error)
       })
@@ -76,7 +69,7 @@ export default function Library() {
       .catch((error) => {
         console.error(error)
       })
-  }, [position])
+  }, [position, library])
 
   async function fetchLibrary() {
     try {
@@ -97,6 +90,7 @@ export default function Library() {
       }
 
       setLibrary(data.result)
+
       setLoading(false)
 
       va.track('library-fetched')
@@ -125,7 +119,8 @@ export default function Library() {
         )
       }
 
-      setCurrent(data.result)
+      const result = data.result
+      setCurrent(result)
       setLoading(false)
       va.track('library-progression', { progression: library[position] })
     } catch (error) {
