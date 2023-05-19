@@ -182,7 +182,7 @@ export default function Library() {
   }
 
   const uniqueChords =
-    current.length > 0 &&
+    current.progression.length > 0 &&
     current.progression[variationPosition] &&
     current.progression[variationPosition].fingering &&
     current.progression[variationPosition].fingering.length > 0
