@@ -65,7 +65,6 @@ export default async function (req, res) {
     let json = content.substring(start, end)
     let parsed = JSON.parse(json)
 
-    console.log(parsed)
     try {
       kv.hset('e-' + chords.toString(), {
         generation: parsed.result,

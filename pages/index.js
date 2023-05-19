@@ -6,10 +6,11 @@ import { Menu, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { Fragment } from 'react'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
-import { XMarkIcon } from '@heroicons/react/20/solid'
+import { XMarkIcon, BookOpenIcon } from '@heroicons/react/20/solid'
 import { Disclosure } from '@headlessui/react'
 import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 import va from '@vercel/analytics'
+import Link from 'next/link'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -87,7 +88,6 @@ export default function Home() {
       }))
 
       va.track('progression', state.prompt)
-   
     } catch (error) {
       console.error(error)
       setState({
@@ -144,7 +144,6 @@ export default function Home() {
         style: state.generation.style,
         key: state.generation.key,
       })
-      
     } catch (error) {
       console.error(error)
       setState({
@@ -206,7 +205,7 @@ export default function Home() {
                       onClick={() => {
                         setState({
                           ...state,
-                          showError: true,
+                          showError: false,
                         })
                       }}
                     >
@@ -769,6 +768,18 @@ export default function Home() {
                 {UserSelectionMenus}
                 {GenerationSection()}
               </div>
+
+              {!state.generation && !state.loading && (
+                <h2 className="text-md mt-2  text-center font-semibold text-slate-700">
+                  <Link href={`/library`} className=" border-b pb-1">
+                    Explore Library
+                    <BookOpenIcon
+                      className="ml-1 inline-flex h-5 w-5 -translate-y-0.5"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </h2>
+              )}
             </div>
             <div
               className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
