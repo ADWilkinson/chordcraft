@@ -6,8 +6,14 @@ export default async function (req, res) {
   const key = generationKey
 
   try {
-    const progression = await kv.hget('p-' + key, 'generation')
-    const explanation = await kv.hget('e-' + key, 'generation')
+    const progression = await kv.hget(
+      'p-' + key.replace('-sharp-', '#'),
+      'generation'
+    )
+    const explanation = await kv.hget(
+      'e-' + key.replace('-sharp-', '#'),
+      'generation'
+    )
     res.status(200).json({
       result: {
         progression: progression,

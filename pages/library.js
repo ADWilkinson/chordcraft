@@ -104,12 +104,15 @@ export default function Library() {
   async function fetchProgression() {
     try {
       setLoading(true)
-      const response = await fetch('/api/library/' + library[position], {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const response = await fetch(
+        '/api/library/' + library[position].replace('#', '-sharp-'),
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
 
       const data = await response.json()
       if (response.status !== 200) {
