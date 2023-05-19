@@ -122,7 +122,7 @@ export default function Library() {
       const result = data.result
       setCurrent(result)
       setLoading(false)
-      va.track('fetched-progression', library[position])
+      va.track('library-progression', { progression: library[position] })
     } catch (error) {
       console.error(error)
       setLoading(false)
