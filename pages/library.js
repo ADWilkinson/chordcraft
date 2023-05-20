@@ -334,7 +334,7 @@ export default function Library() {
                   <dd
                     className={
                       (c.tab.toString().length > 13
-                        ? ' text-sm '
+                        ? ' text-lg '
                         : ' text-xl ') +
                       'mt-1  font-semibold uppercase tracking-wider text-gray-800'
                     }
