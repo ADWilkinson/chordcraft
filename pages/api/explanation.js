@@ -24,11 +24,12 @@ export default async function (req, res) {
     return
   }
 
+  const id = req.body.id || null
   const chords = req.body.progression || null
   const style = req.body.style || null
   const key = req.body.key || null
   const history = req.body.history || null
-  if (!chords || !style || !key || !history) {
+  if (!chords || !style || !key || !history || !id) {
     res.status(400).json({
       error: {
         message: 'Please enter a valid userInput',
@@ -66,14 +67,15 @@ export default async function (req, res) {
     console.log(json)
     let parsed = JSON.parse(json)
 
-    try {
-      await kv.lpush('theory-' + chords.toString(), json)
-    } catch (error) {
-      console.error(error)
+    let dbEntity = {
+      id: id,
+      ...parsed,
     }
 
+    await kv.lpush('theory-' + chords.toString(), JSON.stringify(dbEntity))
+
     res.status(200).json({
-      result: parsed.result,
+      ...dbEntity,
       input: explanation,
     })
   } catch (error) {

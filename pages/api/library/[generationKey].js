@@ -12,12 +12,18 @@ export default async function (req, res) {
       -1
     )
 
+
     const explanation = await kv.lrange(
       'theory-' + key.replace('-sharp-', '#'),
       0,
       -1
     )
-
+    console.log({
+      result: {
+        progression: progression,
+        explanation: explanation,
+      },
+    })
     res.status(200).json({
       result: {
         progression: progression,

@@ -51,11 +51,15 @@ export default function Library() {
   const [loadingExplanation, setLoadingExplanation] = useState(false)
   const [cache, setCache] = useState([])
 
+  const linkedExplanation = current.explanation && current.explanation.find(
+    (x) => x.id === current.progression[variationPosition].id
+  )
+
   useEffect(() => {
     if (showError) {
       setTimeout(() => {
         setShowError(false)
-      }, 5000)
+      }, 3000)
     }
   }, [showError])
 
@@ -158,7 +162,8 @@ export default function Library() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          progression: current.progression[variationPosition].result,
+          id: current.progression[variationPosition].id,
+          progression: current.progression[variationPosition].progression,
           style: current.progression[variationPosition].style,
           key: current.progression[variationPosition].key,
           history: [],
@@ -170,7 +175,8 @@ export default function Library() {
       setLoadingExplanation(false)
 
       va.track('explanation', {
-        progression: current.progression[variationPosition].result.toString(),
+        progression:
+          current.progression[variationPosition].progression.toString(),
         style: current.progression[variationPosition].style,
         key: current.progression[variationPosition].key,
       })
@@ -181,7 +187,8 @@ export default function Library() {
     }
   }
 
-  const uniqueChords = current.progression &&
+  const uniqueChords =
+    current.progression &&
     current.progression.length > 0 &&
     current.progression[variationPosition] &&
     current.progression[variationPosition].fingering &&
@@ -288,25 +295,23 @@ export default function Library() {
   )
 
   const GenerationSection = () => {
+    console.log(current)
     if (current.progression && current.progression.length === 0) return <></>
     const hasGeneration =
       current.progression && current.progression[variationPosition]
-    const hasExplanation =
-      current.explanation &&
-      current.explanation[variationPosition] &&
-      current.explanation[variationPosition].result
+    const hasExplanation = current.explanation && linkedExplanation
 
     const renderExplanationButton = () =>
       current.progression[variationPosition] &&
       !hasExplanation && (
         <button
           disabled={
-            loading || !hasGeneration || hasExplanation || loadingExplanation
+            loading || !hasGeneration || hasExplanation || loadingExplanation || showError
           }
           onClick={generateExplanation}
           className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
         >
-          Explanation&nbsp;<span aria-hidden="true">→</span>
+          Theory&nbsp;<span aria-hidden="true">→</span>
         </button>
       )
 
@@ -349,50 +354,48 @@ export default function Library() {
           <div className="mx-auto max-w-7xl px-6 py-8 sm:py-8 lg:px-8 lg:py-8">
             <div className="mx-auto max-w-4xl divide-y divide-black/10">
               <dl className="space-y-6 divide-y divide-black/10">
-                {current.explanation[variationPosition].result.map(
-                  (x, index) => (
-                    <Disclosure
-                      as="div"
-                      key={x.topic}
-                      className={index === 0 ? '' : 'pt-6'}
-                    >
-                      {({ open }) => (
-                        <>
-                          <dt>
-                            <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
-                              <span className="text-base font-semibold leading-7">
-                                {x.topic}
-                              </span>
-                              <span className="ml-6 flex h-7 items-center">
-                                {open ? (
-                                  <MinusSmallIcon
-                                    className="h-6 w-6"
-                                    aria-hidden="true"
-                                  />
-                                ) : (
-                                  <PlusSmallIcon
-                                    className="h-6 w-6"
-                                    aria-hidden="true"
-                                  />
-                                )}
-                              </span>
-                            </Disclosure.Button>
-                          </dt>
-                          <Disclosure.Panel
-                            as="dd"
-                            className="mt-2 pr-12 text-left"
-                          >
-                            <p className="text-left text-base leading-7 text-gray-600">
-                              <ReactMarkdown>
-                                {x.explanation.replaceAll('<br>', '  \n')}
-                              </ReactMarkdown>
-                            </p>
-                          </Disclosure.Panel>
-                        </>
-                      )}
-                    </Disclosure>
-                  )
-                )}
+                {linkedExplanation.result.map((x, index) => (
+                  <Disclosure
+                    as="div"
+                    key={x.topic}
+                    className={index === 0 ? '' : 'pt-6'}
+                  >
+                    {({ open }) => (
+                      <>
+                        <dt>
+                          <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
+                            <span className="text-base font-semibold leading-7">
+                              {x.topic}
+                            </span>
+                            <span className="ml-6 flex h-7 items-center">
+                              {open ? (
+                                <MinusSmallIcon
+                                  className="h-6 w-6"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <PlusSmallIcon
+                                  className="h-6 w-6"
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </span>
+                          </Disclosure.Button>
+                        </dt>
+                        <Disclosure.Panel
+                          as="dd"
+                          className="mt-2 pr-12 text-left"
+                        >
+                          <p className="text-left text-base leading-7 text-gray-600">
+                            <ReactMarkdown>
+                              {x.explanation.replaceAll('<br>', '  \n')}
+                            </ReactMarkdown>
+                          </p>
+                        </Disclosure.Panel>
+                      </>
+                    )}
+                  </Disclosure>
+                ))}
               </dl>
             </div>
           </div>
@@ -430,22 +433,22 @@ export default function Library() {
                 )}
 
                 <h3 className="rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
-                  {current.progression[variationPosition].result.map(
+                  {current.progression[variationPosition].progression.map(
                     (chord, index) => (
                       <Fragment key={index}>
                         <span className={'px-0.5 text-pink-500'}>{chord} </span>
-                        {current.progression[variationPosition].result.length >=
-                          6 &&
-                          current.progression[variationPosition].result.length <
-                            12 &&
+                        {current.progression[variationPosition].progression
+                          .length >= 6 &&
+                          current.progression[variationPosition].progression
+                            .length < 12 &&
                           index === 3 && <br />}
-                        {current.progression[variationPosition].result.length >=
-                          12 &&
-                          current.progression[variationPosition].result.length <
-                            16 &&
+                        {current.progression[variationPosition].progression
+                          .length >= 12 &&
+                          current.progression[variationPosition].progression
+                            .length < 16 &&
                           index === 7 && <br />}
-                        {current.progression[variationPosition].result.length >=
-                          16 &&
+                        {current.progression[variationPosition].progression
+                          .length >= 16 &&
                           index === 11 && <br />}
                       </Fragment>
                     )
@@ -511,7 +514,6 @@ export default function Library() {
                       current.progression[variationPosition].scale}
                   </dd>
                 </div>
-
               </dl>
 
               {current.progression[variationPosition] &&

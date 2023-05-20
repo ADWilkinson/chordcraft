@@ -100,7 +100,7 @@ export default function Home() {
 
   async function generateExplanation(event) {
     event.preventDefault()
-    if (state.generation?.result === undefined) return
+    if (state.generation?.progression === undefined) return
     try {
       setState({ ...state, loadingExplanation: true })
       const response = await fetch('/api/explanation', {
@@ -109,7 +109,8 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          progression: state.generation.result,
+          id: state.generation.id,
+          progression: state.generation.progression,
           style: state.generation.style,
           key: state.generation.key,
           history: [...state.promptHistory],
@@ -140,7 +141,7 @@ export default function Home() {
       })
 
       va.track('explanation', {
-        progression: state.generation.result.toString(),
+        progression: state.generation.progression.toString(),
         style: state.generation.style,
         key: state.generation.key,
       })
@@ -423,7 +424,9 @@ export default function Home() {
   )
 
   const GenerationSection = () => {
-    const hasGeneration = state.generation && state.generation.result
+    console.log('state', state.generation)
+    console.log('state', state.explanation)
+    const hasGeneration = state.generation && state.generation.progression
     const hasExplanation = state.explanation && state.explanation.length > 0
 
     const renderLoadingIndicator = () => (
@@ -478,7 +481,7 @@ export default function Home() {
           onClick={generateExplanation}
           className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
         >
-          Explanation&nbsp;<span aria-hidden="true">→</span>
+          Theory&nbsp;<span aria-hidden="true">→</span>
         </button>
       )
 
@@ -590,16 +593,16 @@ export default function Home() {
             <div>
               <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
                 <h3 className="rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
-                  {state.generation.result.map((chord, index) => (
+                  {state.generation.progression.map((chord, index) => (
                     <Fragment key={index}>
                       <span className={'px-0.5 text-pink-500'}>{chord} </span>
-                      {state.generation.result.length >= 6 &&
-                        state.generation.result.length < 12 &&
+                      {state.generation.progression.length >= 6 &&
+                        state.generation.progression.length < 12 &&
                         index === 3 && <br />}
-                      {state.generation.result.length >= 12 &&
-                        state.generation.result.length < 16 &&
+                      {state.generation.progression.length >= 12 &&
+                        state.generation.progression.length < 16 &&
                         index === 7 && <br />}
-                      {state.generation.result.length >= 16 && index === 11 && (
+                      {state.generation.progression.length >= 16 && index === 11 && (
                         <br />
                       )}
                     </Fragment>

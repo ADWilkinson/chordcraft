@@ -1,5 +1,6 @@
 import { Configuration, OpenAIApi } from 'openai'
 import { kv } from '@vercel/kv'
+import { v4 as uuidv4 } from 'uuid'
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -51,42 +52,41 @@ export default async function (req, res) {
     let start = content.indexOf('{')
     let end = content.lastIndexOf('}') + 1
     let json = content.substring(start, end)
-    console.log(json);
     let parsed = JSON.parse(json)
 
-    try {
-      const list = await kv.lrange('genKeys', 0, -1)
-      if (list.includes(parsed.result.toString())) {
-        console.log('Key exists in KV, skipping DB write')
-      } else {
-        await kv.lpush('genKeys', parsed.result.toString())
-      }
-
-      let dbEntity = {
-        progression: parsed.result,
-        context: parsed.context,
-        key: parsed.key,
-        scale: parsed.scale,
-        tempo: parsed.tempo,
-        style: parsed.style,
-      }
-
-      if (parsed.strumming_pattern) {
-        dbEntity.strumming_pattern = parsed.strumming_pattern
-      }
-
-      if (parsed.fingering) {
-        dbEntity.fingering = parsed.fingering
-      }
-
-      await kv.lpush('progression-' + parsed.result.toString(), json)
-      
-    } catch (error) {
-      console.error(error)
+    const list = await kv.lrange('genKeys', 0, -1)
+    if (list.includes(parsed.result.toString())) {
+      console.log('Key exists in KV, skipping DB write')
+    } else {
+      await kv.lpush('genKeys', parsed.result.toString())
     }
 
+    let dbEntity = {
+      id: uuidv4(),
+      progression: parsed.result,
+      context: parsed.context,
+      key: parsed.key,
+      scale: parsed.scale,
+      tempo: parsed.tempo,
+      style: parsed.style,
+    }
+
+    if (parsed.strumming_pattern) {
+      dbEntity.strumming_pattern = parsed.strumming_pattern
+    }
+
+    if (parsed.fingering) {
+      dbEntity.fingering = parsed.fingering
+    }
+
+    console.log(JSON.stringify(dbEntity))
+    await kv.lpush(
+      'progression-' + parsed.result.toString(),
+      JSON.stringify(dbEntity)
+    )
+
     res.status(200).json({
-      result: parsed,
+      result: dbEntity,
       input: prompt,
     })
   } catch (error) {
