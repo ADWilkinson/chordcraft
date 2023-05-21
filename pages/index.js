@@ -558,7 +558,7 @@ export default function Home() {
                         >
                           <p className="text-left text-base leading-7 text-gray-600">
                             <ReactMarkdown>
-                              {x.explanation.replaceAll('<br>', '  \n')}
+                              {x.explanation?.replaceAll('<br>', '  \n')}
                             </ReactMarkdown>
                           </p>
                         </Disclosure.Panel>

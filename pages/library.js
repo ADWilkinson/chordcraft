@@ -51,9 +51,11 @@ export default function Library() {
   const [loadingExplanation, setLoadingExplanation] = useState(false)
   const [cache, setCache] = useState([])
 
-  const linkedExplanation = current.explanation && current.explanation.find(
-    (x) => x.id === current.progression[variationPosition].id
-  )
+  const linkedExplanation =
+    current.explanation &&
+    current.explanation.find(
+      (x) => x.id === current.progression[variationPosition].id
+    )
 
   useEffect(() => {
     if (showError) {
@@ -306,7 +308,11 @@ export default function Library() {
       !hasExplanation && (
         <button
           disabled={
-            loading || !hasGeneration || hasExplanation || loadingExplanation || showError
+            loading ||
+            !hasGeneration ||
+            hasExplanation ||
+            loadingExplanation ||
+            showError
           }
           onClick={generateExplanation}
           className="mt-6 rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-600"
@@ -360,40 +366,42 @@ export default function Library() {
                     key={x.topic}
                     className={index === 0 ? '' : 'pt-6'}
                   >
-                    {({ open }) => (
-                      <>
-                        <dt>
-                          <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
-                            <span className="text-base font-semibold leading-7">
-                              {x.topic}
-                            </span>
-                            <span className="ml-6 flex h-7 items-center">
-                              {open ? (
-                                <MinusSmallIcon
-                                  className="h-6 w-6"
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <PlusSmallIcon
-                                  className="h-6 w-6"
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </span>
-                          </Disclosure.Button>
-                        </dt>
-                        <Disclosure.Panel
-                          as="dd"
-                          className="mt-2 pr-12 text-left"
-                        >
-                          <p className="text-left text-base leading-7 text-gray-600">
-                            <ReactMarkdown>
-                              {x.explanation.replaceAll('<br>', '  \n')}
-                            </ReactMarkdown>
-                          </p>
-                        </Disclosure.Panel>
-                      </>
-                    )}
+                    {({ open }) =>
+                      x.explanation && (
+                        <>
+                          <dt>
+                            <Disclosure.Button className="flex w-full items-start justify-between text-left text-gray-800">
+                              <span className="text-base font-semibold leading-7">
+                                {x.topic}
+                              </span>
+                              <span className="ml-6 flex h-7 items-center">
+                                {open ? (
+                                  <MinusSmallIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <PlusSmallIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                  />
+                                )}
+                              </span>
+                            </Disclosure.Button>
+                          </dt>
+                          <Disclosure.Panel
+                            as="dd"
+                            className="mt-2 pr-12 text-left"
+                          >
+                            <p className="text-left text-base leading-7 text-gray-600">
+                              <ReactMarkdown>
+                                {x.explanation?.replaceAll('<br>', '  \n')}
+                              </ReactMarkdown>
+                            </p>
+                          </Disclosure.Panel>
+                        </>
+                      )
+                    }
                   </Disclosure>
                 ))}
               </dl>
