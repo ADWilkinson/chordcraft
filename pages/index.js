@@ -79,7 +79,7 @@ export default function Home() {
         generation: result,
         promptHistory: [
           ...state.promptHistory,
-          { role: 'user', content: data.input },
+          ...data.input,
           {
             role: 'assistant',
             content: JSON.stringify(result),
@@ -609,9 +609,8 @@ export default function Home() {
                       {state.generation.progression.length >= 12 &&
                         state.generation.progression.length < 16 &&
                         index === 7 && <br />}
-                      {state.generation.progression.length >= 16 && index === 11 && (
-                        <br />
-                      )}
+                      {state.generation.progression.length >= 16 &&
+                        index === 11 && <br />}
                     </Fragment>
                   ))}
                 </h3>

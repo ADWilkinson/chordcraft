@@ -2,110 +2,63 @@ import { Configuration, OpenAIApi } from 'openai'
 import { kv } from '@vercel/kv'
 import { v4 as uuidv4 } from 'uuid'
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
-if (!configuration.apiKey) {
+// Check API key at start of the application
+if (!process.env.OPENAI_API_KEY) {
   console.error(
     'OpenAI API key not configured, please follow instructions in README.md'
   )
   process.exit(1)
 }
 
-const openai = new OpenAIApi(configuration)
+const openai = new OpenAIApi(
+  new Configuration({ apiKey: process.env.OPENAI_API_KEY })
+)
 
-export default async function (req, res) {
-  if (!req.body || !req.body.userInput) {
-    res.status(400).json({
-      error: {
-        message: 'Please enter a valid userInput',
-      },
-    })
+export default async function handleRequest(req, res) {
+  const userInput = req.body?.userInput
+
+  if (!userInput) {
+    res
+      .status(400)
+      .json({ error: { message: 'Please enter a valid userInput' } })
     return
   }
 
-  const userInput = req.body.userInput
-  const prompt = generatePrompt(userInput)
-
   try {
-    const completion = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.8,
-      max_tokens: 512,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      stream: false,
-    })
+    const completion = await openai.createChatCompletion(
+      generatePrompt(userInput)
+    )
 
-    if (
-      !completion.data ||
-      !completion.data.choices[0] ||
-      !completion.data.choices[0].message.content
-    ) {
+    if (!completion.data?.choices?.[0]?.message.content) {
       throw new Error('Unexpected response format from OpenAI API')
     }
 
-    const content = completion.data.choices[0].message.content
-    let start = content.indexOf('{')
-    let end = content.lastIndexOf('}') + 1
-    let json = content.substring(start, end)
-    let parsed = JSON.parse(json)
-
+    const parsed = parseAPIResponse(completion.data.choices[0].message.content)
     const list = await kv.lrange('genKeys', 0, -1)
-    if (list.includes(parsed.result.toString())) {
-      console.log('Key exists in KV, skipping DB write')
-    } else {
+
+    if (!list.includes(parsed.result.toString())) {
       await kv.lpush('genKeys', parsed.result.toString())
     }
 
-    let dbEntity = {
-      id: uuidv4(),
-      progression: parsed.result,
-      context: parsed.context,
-      key: parsed.key,
-      scale: parsed.scale,
-      tempo: parsed.tempo,
-      style: parsed.style,
-    }
-
-    if (parsed.strumming_pattern) {
-      dbEntity.strumming_pattern = parsed.strumming_pattern
-    }
-
-    if (parsed.fingering) {
-      dbEntity.fingering = parsed.fingering
-    }
-
-    console.log(JSON.stringify(dbEntity))
+    const dbEntity = await prepareDbEntity(parsed)
     await kv.lpush(
       'progression-' + parsed.result.toString(),
       JSON.stringify(dbEntity)
     )
 
-    res.status(200).json({
-      result: dbEntity,
-      input: prompt,
-    })
+    res.status(200).json({ result: dbEntity, input: generatePrompt(userInput).messages })
   } catch (error) {
-    if (error.response) {
-      console.error(error.response.status, error.response.data)
-      res.status(error.response.status).json(error.response.data)
-    } else {
-      console.error(`Error with OpenAI API request: ${error.message}`)
-      res.status(500).json({
-        error: {
-          message: 'An error occurred during your request.',
-        },
-      })
-    }
+    handleError(error, res)
   }
 }
 
-function generatePrompt({ mood, style }) {
-  return `Create a ${mood} chord progression in the style of ${style}.
+const generatePrompt = ({ mood, style }) => {
+  return {
+    model: 'gpt-3.5-turbo',
+    messages: [
+      {
+        role: 'user',
+        content: `Create a ${mood} chord progression in the style of ${style}.
 
 Respond only with a valid JSON object with the following data structure:
 """
@@ -137,5 +90,49 @@ property names must be lowercase.
 property names must be enclosed in double quotes.
 property values must be enclosed in double quotes.
 Do not nest any other undefined objects within the JSON object.
-Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.`
+Be Concise with your explanations without repeating yourself, also send no other text apart from the JSON object.`,
+      },
+    ],
+    temperature: 0.8,
+    max_tokens: 512,
+    top_p: 1,
+    frequency_penalty: 0,
+    presence_penalty: 0,
+    stream: false,
+  }
+}
+
+const parseAPIResponse = (content) => {
+  let start = content.indexOf('{')
+  let end = content.lastIndexOf('}') + 1
+  return JSON.parse(content.substring(start, end))
+}
+
+const prepareDbEntity = async (parsed) => {
+  let dbEntity = {
+    id: uuidv4(),
+    progression: parsed.result,
+    context: parsed.context,
+    key: parsed.key,
+    scale: parsed.scale,
+    tempo: parsed.tempo,
+    style: parsed.style,
+    strumming_pattern: parsed.strumming_pattern || null,
+    fingering: parsed.fingering || null,
+  }
+
+  console.log(JSON.stringify(dbEntity))
+  return dbEntity
+}
+
+const handleError = (error, res) => {
+  if (error.response) {
+    console.error(error.response.status, error.response.data)
+    res.status(error.response.status).json(error.response.data)
+  } else {
+    console.error(`Error with OpenAI API request: ${error.message}`)
+    res
+      .status(500)
+      .json({ error: { message: 'An error occurred during your request.' } })
+  }
 }
