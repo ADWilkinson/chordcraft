@@ -54,7 +54,7 @@ export default function Library() {
   const linkedExplanation =
     current.explanation &&
     current.explanation.find(
-      (x) => x.id === current.progression[variationPosition].id
+      (x) => x.id === current.progression[variationPosition]?.id
     )
 
   useEffect(() => {
@@ -572,6 +572,7 @@ export default function Library() {
                         disabled={loading}
                         onClick={() => {
                           setPosition(randomPosition(library, position))
+                          setVariationPosition(0)
                         }}
                         className="justify-right text-md mt-6 flex rounded-md border border-pink-500 px-3.5 py-2.5 font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:border-gray-600 disabled:text-gray-300"
                       >
