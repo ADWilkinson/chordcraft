@@ -39,6 +39,7 @@ const initialState = {
   loadingExplanation: false,
   showError: false,
   promptHistory: [],
+  descriptionHover: false,
 }
 
 export default function Home() {
@@ -224,7 +225,11 @@ export default function Home() {
   )
 
   const Hero = () => (
-    <div className="border-b pb-4">
+    <div
+      className="border-b pb-4"
+      onMouseEnter={() => setState({ ...state, descriptionHover: true })}
+      onMouseLeave={() => setState({ ...state, descriptionHover: false })}
+    >
       <img
         className="mx-auto mb-6 h-24 w-24 justify-center border-black sm:h-32 sm:w-32"
         src="/chord.png"
@@ -237,9 +242,20 @@ export default function Home() {
         </span>
       </h1>
 
-      <p className="mt-6 text-lg leading-8 text-gray-600">
-        Select a style and mood to generate something new to play.
-      </p>
+      <div>
+        {!state.descriptionHover ? (
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            Select a style and mood to generate something new to play.
+          </p>
+        ) : (
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            Created by{' '}
+            <a className="text-pink-500 " target='_blank' href="https://github.com/ADWilkinson">
+              Andrew Wilkinson
+            </a>
+          </p>
+        )}
+      </div>
     </div>
   )
 
