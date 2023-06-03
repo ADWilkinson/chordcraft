@@ -250,7 +250,11 @@ export default function Home() {
         ) : (
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Created by{' '}
-            <a className="text-pink-500 " target='_blank' href="https://github.com/ADWilkinson">
+            <a
+              className="text-pink-500 "
+              target="_blank"
+              href="https://github.com/ADWilkinson"
+            >
               Andrew Wilkinson
             </a>
           </p>
@@ -596,15 +600,24 @@ export default function Home() {
         ) : (
           <>
             {hasGeneration ? (
-              <button
-                disabled={state.loading}
-                onClick={() => {
-                  setState(initialState)
-                }}
-                className="justify-left mt-6 flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
-              >
-                <span aria-hidden="true">←</span>&nbsp;New Progression
-              </button>
+              <>
+                <button
+                  disabled={state.loading}
+                  onClick={() => {
+                    setState(initialState)
+                  }}
+                  className="justify-left mt-6 inline-flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
+                >
+                  <span aria-hidden="true">←</span>&nbsp;New Progression
+                </button>
+                <button
+                  disabled={state.loading}
+                  onClick={generateProgression}
+                  className="justify-right mt-6 ml-4 inline-flex rounded-md border border-pink-500 px-3.5 py-2.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 disabled:bg-gray-600"
+                >
+               Regenerate
+                </button>
+              </>
             ) : (
               renderGenerationButton()
             )}
@@ -612,7 +625,7 @@ export default function Home() {
         )}
 
         <div className="mt-4 py-4">
-          {hasGeneration && (
+          {hasGeneration && !state.loading && (
             <div>
               <div className="rounded-lg bg-white px-4 py-5   shadow shadow-pink-200 sm:p-6">
                 <h3 className="rounded-lg bg-white px-4 pb-4 text-4xl font-bold tracking-tight">
@@ -643,7 +656,7 @@ export default function Home() {
             </div>
           )}
 
-          {hasGeneration && (
+          {hasGeneration && !state.loading && (
             <div>
               <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-4">
                 <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
