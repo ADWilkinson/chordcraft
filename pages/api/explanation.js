@@ -47,7 +47,7 @@ export default async function handleRequest(req, res) {
 
 const generatePrompt = (chordProgression, style, key, history) => {
   return {
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4',
     messages: [
       ...history,
       {
