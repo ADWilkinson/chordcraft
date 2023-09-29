@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from 'openai'
+import OpenAI from 'openai'
 import { kv } from '@vercel/kv'
 
 // Check API key at start of the application
@@ -9,9 +9,7 @@ if (!process.env.OPENAI_API_KEY) {
   process.exit(1)
 }
 
-const openai = new OpenAIApi(
-  new Configuration({ apiKey: process.env.OPENAI_API_KEY })
-)
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export default async function handleRequest(req, res) {
   const { id, progression: chords, style, key, history } = req.body || {}
@@ -24,22 +22,25 @@ export default async function handleRequest(req, res) {
   }
 
   try {
-    const completion = await openai.createChatCompletion(
+    const completion = await openai.chat.completions.create(
       generatePrompt(chords, style, key, history)
     )
 
-    if (!completion.data?.choices?.[0]?.message.content) {
+    if (!completion.choices?.[0]?.message.content) {
       throw new Error('Unexpected response format from OpenAI API')
     }
 
-    const parsed = parseAPIResponse(completion.data.choices[0].message.content)
+    const parsed = parseAPIResponse(completion.choices[0].message.content)
     const dbEntity = { id, ...parsed }
 
     await kv.lpush('theory-' + chords.toString(), JSON.stringify(dbEntity))
 
     res
       .status(200)
-      .json({ ...dbEntity, input: generatePrompt(chords, style, key, history).messages })
+      .json({
+        ...dbEntity,
+        input: generatePrompt(chords, style, key, history).messages,
+      })
   } catch (error) {
     handleError(error, res)
   }
@@ -117,9 +118,12 @@ const parseAPIResponse = (content) => {
 }
 
 const handleError = (error, res) => {
-  if (error.response) {
-    console.error(error.response.status, error.response.data)
-    res.status(error.response.status).json(error.response.data)
+  if (error instanceof OpenAI.APIError) {
+    console.error(error.status) // e.g. 401
+    console.error(error.message) // e.g. The authentication token you passed was invalid...
+    console.error(error.code) // e.g. 'invalid_api_key'
+    console.error(error.type) // e.g. 'invalid_request_error'
+    res.status(error.status).json(error.message)
   } else {
     console.error(`Error with OpenAI API request: ${error.message}`)
     res
